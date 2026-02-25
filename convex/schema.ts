@@ -33,7 +33,7 @@ export default defineSchema({
       v.literal("active"),
       v.literal("blocked"),
     ),
-    currentTaskId: v.optional(v.id("tasks")),
+    currentTaskId: v.optional(v.string()),
     sessionKey: v.string(),
   })
     .index("by_status", ["status"])
@@ -44,37 +44,38 @@ export default defineSchema({
     description: v.string(),
     status: v.union(
       v.literal("inbox"),
+      v.literal("pending"),
       v.literal("assigned"),
       v.literal("in_progress"),
       v.literal("review"),
       v.literal("done"),
     ),
-    assigneeIds: v.array(v.id("agents")),
+    assigneeIds: v.array(v.string()),
   }).index("by_status", ["status"]),
 
   messages: defineTable({
-    taskId: v.id("tasks"),
-    fromAgentId: v.id("agents"),
+    taskId: v.string(),
+    fromAgentId: v.string(),
     content: v.string(),
-    attachments: v.array(v.id("documents")),
-    createdAt: v.number(),
+    attachments: v.array(v.string()),
+    createdAt: v.optional(v.number()),
   }).index("by_task", ["taskId"]),
 
   mentions: defineTable({
-    taskId: v.id("tasks"),
-    messageId: v.id("messages"),
-    mentionedAgentId: v.id("agents"),
-    createdAt: v.number(),
+    taskId: v.string(),
+    messageId: v.string(),
+    mentionedAgentId: v.string(),
+    createdAt: v.optional(v.number()),
   })
     .index("by_agent", ["mentionedAgentId"])
     .index("by_task", ["taskId"]),
 
   activities: defineTable({
     type: v.string(),
-    agentId: v.id("agents"),
-    taskId: v.optional(v.id("tasks")),
+    agentId: v.string(),
+    taskId: v.optional(v.string()),
     message: v.string(),
-    createdAt: v.number(),
+    createdAt: v.optional(v.number()),
   })
     .index("by_task", ["taskId"])
     .index("by_created_at", ["createdAt"]),
@@ -83,17 +84,17 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     type: v.string(),
-    taskId: v.id("tasks"),
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    taskId: v.string(),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
   }).index("by_task", ["taskId"]),
 
   notifications: defineTable({
-    mentionedAgentId: v.id("agents"),
+    mentionedAgentId: v.string(),
     content: v.string(),
     delivered: v.boolean(),
-    taskId: v.optional(v.id("tasks")),
-    createdAt: v.number(),
+    taskId: v.optional(v.string()),
+    createdAt: v.optional(v.number()),
   })
     .index("by_agent", ["mentionedAgentId"])
     .index("by_agent_delivered", ["mentionedAgentId", "delivered"]),

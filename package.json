@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev --dotenv .env.local",
+    "dev": "nuxt dev --dotenv .env",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -31,6 +31,7 @@
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.7.0",
+    "tsx": "^4.21.0",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.5"
   }

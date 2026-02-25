@@ -1,75 +1,63 @@
-# Nuxt Minimal Starter
+# Agents Mission Control
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Dashboard de controle de missão em Nuxt 4 com layout Kanban task-centric e backend de dados em Convex.
 
-## Setup
+## Stack
 
-Make sure to install dependencies:
+- Nuxt 4 + Vue 3 + TypeScript strict
+- TailwindCSS
+- Convex (schema + functions)
+
+## Setup local
+
+1. Instale dependências:
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+2. Copie as variáveis de ambiente:
 
 ```bash
-# npm
+cp .env.example .env.local
+```
+
+3. Ajuste pelo menos:
+
+- `NUXT_PUBLIC_CONVEX_URL`
+- `CONVEX_DEPLOYMENT`
+- `SESSION_SECRET`
+
+4. Rode o Convex dev (gera a pasta `convex/_generated` e sincroniza functions):
+
+```bash
+npx convex dev
+```
+
+5. Em outro terminal, rode a aplicação:
+
+```bash
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+App disponível em `http://localhost:3000`.
 
-Build the application for production:
+## Scripts
 
 ```bash
-# npm
+npm run dev
+npm run typecheck
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Estrutura principal
+
+- `app/`: frontend Nuxt (layout, componentes, composables)
+- `convex/schema.ts`: schema das tabelas
+- `convex/*.ts`: queries/mutations/actions por domínio
+
+## Observações
+
+- Nesta etapa, as funções Convex usam wrappers genéricos (`queryGeneric`/`mutationGeneric`) para permitir evolução mesmo antes da geração de tipos.
+- Após executar `npx convex dev`, você pode migrar gradualmente para imports tipados de `convex/_generated/server`.

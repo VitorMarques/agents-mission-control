@@ -14,4 +14,9 @@ export default defineNuxtConfig({
     strict: true,
     typeCheck: true,
   },
+  runtimeConfig: {
+    public: {
+      convexUrl: "",
+    },
+  },
 });

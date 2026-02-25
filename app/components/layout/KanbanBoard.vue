@@ -11,6 +11,10 @@ const props = defineProps<{
   columns: Column[];
 }>();
 
+const emit = defineEmits<{
+  selectTask: [task: Task];
+}>();
+
 const tasksByStatus = computed<Record<TaskStatus, Task[]>>(() => {
   return props.tasks.reduce<Record<TaskStatus, Task[]>>(
     (acc, task) => {
@@ -58,7 +62,10 @@ function tasksForStatus(status: TaskStatus) {
         <div
           v-for="task in tasksForStatus(column.status)"
           :key="task.id"
-          class="panel border-l-2 border-l-amber-500 p-3"
+          class="panel cursor-pointer border-l-2 border-l-amber-500 p-3 transition hover:translate-x-0.5 hover:border-l-emerald-400"
+          role="button"
+          tabindex="0"
+          @click="emit('selectTask', task)"
         >
           <h4 class="text-sm font-semibold leading-tight">{{ task.title }}</h4>
           <p

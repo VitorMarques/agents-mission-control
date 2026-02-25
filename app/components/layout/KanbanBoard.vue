@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Task, TaskStatus } from "~/types/mission";
+import { computed } from "vue";
 
 type Column = {
   status: TaskStatus;

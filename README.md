@@ -49,7 +49,46 @@ npm run dev
 npm run typecheck
 npm run build
 npm run preview
+npm run test
+npm run test:watch
 ```
+
+## Testes
+
+- Unitários e integração com Vitest em `tests/`.
+- Principais cenários cobertos:
+  - composição de dados task-centric;
+  - renderização do painel de detalhe da task;
+  - seleção de task no board refletindo no painel;
+  - fluxo base de hashing/validação de senha.
+
+Execute:
+
+```bash
+npm run test
+```
+
+## Docker / Docker Compose
+
+Build da imagem:
+
+```bash
+docker build -t agents-mission-control:local .
+```
+
+Subir com Compose:
+
+```bash
+docker compose up --build
+```
+
+Aplicação disponível em `http://localhost:3000`.
+
+## Deploy EasyPanel
+
+O guia de deploy para VPS com EasyPanel está em:
+
+- `easypanel-deploy.md`
 
 ## Estrutura principal
 

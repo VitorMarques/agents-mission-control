@@ -24,6 +24,13 @@ export const listByTask = query({
   },
 });
 
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("messages").collect();
+  },
+});
+
 export const create = mutation({
   args: {
     taskId: v.id("tasks"),

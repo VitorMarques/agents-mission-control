@@ -14,6 +14,13 @@ export const listByTask = query({
   },
 });
 
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("activities").collect();
+  },
+});
+
 export const create = mutation({
   args: {
     type: v.string(),

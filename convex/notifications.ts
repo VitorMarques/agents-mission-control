@@ -14,6 +14,13 @@ export const listByAgent = query({
   },
 });
 
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("notifications").collect();
+  },
+});
+
 export const listPendingByAgent = query({
   args: { agentId: v.id("agents") },
   handler: async (ctx, args) => {

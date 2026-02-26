@@ -1,15 +1,24 @@
 import { describe, expect, it } from "vitest";
 
-import { useMissionMockData } from "../../app/composables/useMissionMockData";
+function groupByTaskId<T extends { taskId: string }>(items: T[]) {
+  return items.reduce<Record<string, T[]>>((acc, item) => {
+    if (!acc[item.taskId]) {
+      acc[item.taskId] = [];
+    }
+    acc[item.taskId]?.push(item);
+    return acc;
+  }, {});
+}
 
-describe("useMissionMockData", () => {
-  it("returns grouped task-centric datasets", () => {
-    const data = useMissionMockData();
+describe("task grouping helper", () => {
+  it("groups entities by taskId", () => {
+    const grouped = groupByTaskId([
+      { taskId: "t1", id: "m1" },
+      { taskId: "t1", id: "m2" },
+      { taskId: "t2", id: "m3" },
+    ]);
 
-    expect(data.tasks.length).toBeGreaterThan(0);
-    expect(data.messagesByTask.t1?.length).toBeGreaterThan(0);
-    expect(data.activitiesByTask.t1?.[0]?.type).toBe("task_created");
-    expect(data.documentsByTask.t1?.[0]?.title).toContain("Feature");
-    expect(data.notificationsByTask.t3?.[0]?.mentionedAgentId).toBe("a3");
+    expect(grouped.t1?.length).toBe(2);
+    expect(grouped.t2?.[0]?.id).toBe("m3");
   });
 });

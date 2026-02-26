@@ -26,13 +26,20 @@ const props = defineProps<{
       <li
         v-for="agent in props.agents"
         :key="agent.id"
-        class="panel-muted flex items-center justify-between gap-2 p-2"
+        class="panel-muted flex items-center justify-between gap-3 p-2"
       >
-        <div>
-          <p class="text-sm font-medium">{{ agent.name }}</p>
-          <p class="text-xs text-[rgb(var(--muted-foreground))]">
-            {{ agent.role }}
-          </p>
+        <div class="flex min-w-0 items-center gap-2">
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-xl border border-[rgb(var(--border))] bg-white/60 text-lg shadow-sm dark:bg-slate-900/40"
+          >
+            {{ agent.avatarEmoji }}
+          </div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium">{{ agent.name }}</p>
+            <p class="text-xs text-[rgb(var(--muted-foreground))]">
+              {{ agent.role }}
+            </p>
+          </div>
         </div>
         <StatusBadge :status="agent.status" />
       </li>

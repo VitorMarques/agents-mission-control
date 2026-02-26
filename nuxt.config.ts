@@ -16,6 +16,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      appName: "Agents Mission Dashboard",
+      docsUrl: "#",
       convexUrl: "",
     },
   },

@@ -35,9 +35,14 @@ export const create = mutation({
     description: v.string(),
     status: taskStatusValidator,
     assigneeIds: v.array(v.id("agents")),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("tasks", args);
+    return await ctx.db.insert("tasks", {
+      ...args,
+      tags: args.tags ?? [],
+      createdAt: Date.now(),
+    });
   },
 });
 

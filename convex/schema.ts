@@ -28,6 +28,7 @@ export default defineSchema({
   agents: defineTable({
     name: v.string(),
     role: v.string(),
+    avatarEmoji: v.optional(v.string()),
     status: v.union(
       v.literal("idle"),
       v.literal("active"),
@@ -51,6 +52,8 @@ export default defineSchema({
       v.literal("done"),
     ),
     assigneeIds: v.array(v.string()),
+    tags: v.optional(v.array(v.string())),
+    createdAt: v.optional(v.number()),
   }).index("by_status", ["status"]),
 
   messages: defineTable({

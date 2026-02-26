@@ -26,6 +26,9 @@ type DashboardData = {
 const { data, pending, error, refresh } = await useFetch<DashboardData>(
   "/api/mission/dashboard",
 );
+const { data: meData } = await useFetch<{
+  user: { role: "ADMIN" | "MANAGER" | "VIEWER" };
+}>("/api/auth/me");
 
 const router = useRouter();
 
@@ -44,6 +47,7 @@ const columns = computed<DashboardData["columns"]>(
 );
 
 const selectedTaskId = ref<string | null>(null);
+const showTaskModal = ref(false);
 
 watch(
   tasks,
@@ -110,6 +114,21 @@ const reviewingTasks = computed(
       .length,
 );
 
+const missionStatus = computed<"online" | "loading" | "degraded">(() => {
+  if (pending.value) {
+    return "loading";
+  }
+  if (error.value) {
+    return "degraded";
+  }
+  return "online";
+});
+
+const canMoveStatus = computed(() => {
+  const role = meData.value?.user?.role;
+  return role === "ADMIN" || role === "MANAGER";
+});
+
 async function logout() {
   await $fetch("/api/auth/logout", { method: "POST" });
   await router.push("/login");
@@ -117,6 +136,35 @@ async function logout() {
 
 function onSelectTask(task: { id: string }) {
   selectedTaskId.value = task.id;
+}
+
+function openTaskModal() {
+  if (!selectedTask.value) {
+    return;
+  }
+  showTaskModal.value = true;
+}
+
+function closeTaskModal() {
+  showTaskModal.value = false;
+}
+
+async function onMoveTaskStatus(payload: {
+  taskId: string;
+  status: TaskStatus;
+}) {
+  if (!canMoveStatus.value) {
+    return;
+  }
+
+  await $fetch(`/api/tasks/${payload.taskId}/status`, {
+    method: "PATCH",
+    body: {
+      status: payload.status,
+    },
+  });
+
+  await refresh();
 }
 </script>
 
@@ -126,6 +174,7 @@ function onSelectTask(task: { id: string }) {
       :active-agents="activeAgents"
       :queued-tasks="queuedTasks"
       :reviewing-tasks="reviewingTasks"
+      :mission-status="missionStatus"
       @logout="logout"
     />
 
@@ -155,8 +204,20 @@ function onSelectTask(task: { id: string }) {
         <KanbanBoard
           :tasks="tasks"
           :columns="columns"
+          :agents="agents"
+          :can-move-status="canMoveStatus"
           @select-task="onSelectTask"
+          @move-task-status="onMoveTaskStatus"
         />
+        <div class="absolute right-6 top-[5.75rem] z-20">
+          <button
+            class="panel-muted px-3 py-1.5 text-xs"
+            :disabled="!selectedTask"
+            @click="openTaskModal"
+          >
+            Abrir card em popup
+          </button>
+        </div>
         <TaskDetailPanel
           :task="selectedTask"
           :agents="agents"
@@ -164,9 +225,38 @@ function onSelectTask(task: { id: string }) {
           :activities="selectedActivities"
           :documents="selectedDocuments"
           :notifications="selectedNotifications"
+          :can-move-status="canMoveStatus"
+          @move-task-status="onMoveTaskStatus"
         />
-        <LiveFeed :feed="feed" />
+        <LiveFeed
+          :feed="feed"
+          :agents="agents"
+          :tasks="tasks"
+          :messages-by-task="messagesByTask"
+          :activities-by-task="activitiesByTask"
+          :documents-by-task="documentsByTask"
+          :notifications-by-task="notificationsByTask"
+        />
       </template>
     </main>
+
+    <div
+      v-if="showTaskModal && selectedTask"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+      @click.self="closeTaskModal"
+    >
+      <TaskDetailPanel
+        :task="selectedTask"
+        :agents="agents"
+        :messages="selectedMessages"
+        :activities="selectedActivities"
+        :documents="selectedDocuments"
+        :notifications="selectedNotifications"
+        :can-move-status="canMoveStatus"
+        mode="modal"
+        @move-task-status="onMoveTaskStatus"
+        @close="closeTaskModal"
+      />
+    </div>
   </div>
 </template>

@@ -13,13 +13,16 @@ describe("TaskDetailPanel", () => {
           description: "Description",
           status: "inbox",
           assigneeIds: ["a1"],
+          tags: ["research"],
           labels: ["research"],
+          createdAt: Date.now(),
         },
         agents: [
           {
             id: "a1",
             name: "Bhanu",
             role: "Founder",
+            avatarEmoji: "🧠",
             status: "active",
             currentTaskId: "t1",
           },
@@ -37,13 +40,17 @@ describe("TaskDetailPanel", () => {
         activities: [],
         documents: [],
         notifications: [],
+        canMoveStatus: true,
       },
     });
 
     expect(wrapper.text()).toContain("Task A");
     expect(wrapper.text()).toContain("Mensagem de teste");
 
-    await wrapper.findAll("button")[1]?.trigger("click");
+    const activitiesButton = wrapper
+      .findAll("button")
+      .find((button) => button.text().includes("Activities"));
+    await activitiesButton?.trigger("click");
     expect(wrapper.text()).toContain("Sem atividades");
   });
 });

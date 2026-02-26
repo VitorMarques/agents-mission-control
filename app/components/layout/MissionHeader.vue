@@ -3,6 +3,7 @@ const props = defineProps<{
   activeAgents: number;
   queuedTasks: number;
   reviewingTasks: number;
+  missionStatus: "online" | "loading" | "degraded";
 }>();
 
 const emit = defineEmits<{
@@ -10,6 +11,79 @@ const emit = defineEmits<{
 }>();
 
 const isDark = useState<boolean>("theme-dark", () => false);
+const runtimeConfig = useRuntimeConfig();
+const now = ref(new Date());
+
+const convexProjectName = computed(() => {
+  const rawUrl = String(runtimeConfig.public.convexUrl ?? "").trim();
+  if (!rawUrl) {
+    return String(runtimeConfig.public.appName ?? "Mission Dashboard");
+  }
+
+  try {
+    const host = new URL(rawUrl).hostname;
+    const projectSlug = host.split(".")[0];
+    return (
+      projectSlug || String(runtimeConfig.public.appName ?? "Mission Dashboard")
+    );
+  } catch {
+    return String(runtimeConfig.public.appName ?? "Mission Dashboard");
+  }
+});
+
+const docsUrl = computed(() => String(runtimeConfig.public.docsUrl ?? "#"));
+
+const timeLabel = computed(() =>
+  now.value.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }),
+);
+
+const dateLabel = computed(() =>
+  now.value.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }),
+);
+
+const statusLabel = computed(() => {
+  if (props.missionStatus === "loading") {
+    return "SYNCING";
+  }
+  if (props.missionStatus === "degraded") {
+    return "DEGRADED";
+  }
+  return "ONLINE";
+});
+
+const statusClass = computed(() => {
+  if (props.missionStatus === "loading") {
+    return "text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-500/20";
+  }
+  if (props.missionStatus === "degraded") {
+    return "text-rose-700 bg-rose-100 dark:text-rose-300 dark:bg-rose-500/20";
+  }
+  return "text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-500/20";
+});
+
+let clockInterval: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+  clockInterval = setInterval(() => {
+    now.value = new Date();
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  if (clockInterval) {
+    clearInterval(clockInterval);
+    clockInterval = null;
+  }
+});
 
 function toggleTheme() {
   isDark.value = !isDark.value;
@@ -34,7 +108,7 @@ watchEffect(() => {
         >
           Mission Control
         </p>
-        <h1 class="text-sm font-semibold">Agents Mission Dashboard</h1>
+        <h1 class="text-sm font-semibold">{{ convexProjectName }}</h1>
       </div>
     </div>
 
@@ -66,7 +140,28 @@ watchEffect(() => {
     </div>
 
     <div class="flex items-center gap-2">
-      <button class="panel-muted px-3 py-1.5 text-xs font-medium">Docs</button>
+      <a
+        class="panel-muted px-3 py-1.5 text-xs font-medium"
+        :href="docsUrl"
+        target="_blank"
+        rel="noreferrer"
+      >
+        📚 Docs
+      </a>
+      <div class="hidden text-center sm:block">
+        <p class="text-lg font-semibold leading-none">{{ timeLabel }}</p>
+        <p
+          class="mt-1 text-[10px] uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
+        >
+          {{ dateLabel }}
+        </p>
+      </div>
+      <span
+        class="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.2em]"
+        :class="statusClass"
+      >
+        {{ statusLabel }}
+      </span>
       <button
         class="panel-muted px-3 py-1.5 text-xs font-medium"
         type="button"

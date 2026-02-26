@@ -11,6 +11,7 @@ export type Agent = {
   id: string;
   name: string;
   role: string;
+  avatarEmoji: string;
   status: AgentStatus;
   currentTaskId: string | null;
 };
@@ -21,13 +22,22 @@ export type Task = {
   description: string;
   status: TaskStatus;
   assigneeIds: string[];
+  tags: string[];
   labels: string[];
+  createdAt: number;
 };
 
 export type FeedEvent = {
   id: string;
-  type: "task_created" | "message_sent" | "status_changed" | "document_created";
+  type:
+    | "task_created"
+    | "message_sent"
+    | "status_changed"
+    | "document_created"
+    | "decision";
   author: string;
+  agentId?: string;
+  taskId?: string;
   summary: string;
   timestampLabel: string;
 };
@@ -44,7 +54,12 @@ export type TaskMessage = {
 export type TaskActivity = {
   id: string;
   taskId: string;
-  type: "task_created" | "message_sent" | "document_created" | "status_changed";
+  type:
+    | "task_created"
+    | "message_sent"
+    | "document_created"
+    | "status_changed"
+    | "decision";
   agentId: string;
   message: string;
   timestampLabel: string;

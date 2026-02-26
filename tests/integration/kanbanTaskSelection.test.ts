@@ -11,6 +11,7 @@ const fixtureData = {
       id: "a1",
       name: "Agent One",
       role: "Engineer",
+      avatarEmoji: "🤖",
       status: "active" as const,
       currentTaskId: "t1",
     },
@@ -22,7 +23,9 @@ const fixtureData = {
       description: "First task",
       status: "inbox" as const,
       assigneeIds: ["a1"],
+      tags: ["priority"],
       labels: ["priority"],
+      createdAt: Date.now(),
     },
   ],
   columns: [
@@ -72,7 +75,7 @@ describe("task-centric board flow", () => {
       },
       template: `
         <div>
-          <KanbanBoard :tasks="data.tasks" :columns="data.columns" @select-task="selectTask" />
+          <KanbanBoard :tasks="data.tasks" :columns="data.columns" :agents="data.agents" @select-task="selectTask" />
           <TaskDetailPanel
             :task="selectedTask"
             :agents="data.agents"
@@ -80,6 +83,7 @@ describe("task-centric board flow", () => {
             :activities="data.activitiesByTask[selectedTaskId ?? ''] ?? []"
             :documents="data.documentsByTask[selectedTaskId ?? ''] ?? []"
             :notifications="data.notificationsByTask[selectedTaskId ?? ''] ?? []"
+            :can-move-status="true"
           />
         </div>
       `,

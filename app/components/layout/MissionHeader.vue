@@ -139,43 +139,48 @@ watchEffect(() => {
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <a
-        class="panel-muted px-3 py-1.5 text-xs font-medium"
-        :href="docsUrl"
-        target="_blank"
-        rel="noreferrer"
-      >
-        📚 Docs
-      </a>
-      <div class="hidden text-center sm:block">
-        <p class="text-lg font-semibold leading-none">{{ timeLabel }}</p>
-        <p
-          class="mt-1 text-[10px] uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <a
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          :href="docsUrl"
+          target="_blank"
+          rel="noreferrer"
         >
-          {{ dateLabel }}
-        </p>
+          📚 Docs
+        </a>
+        <button
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          type="button"
+          @click="toggleTheme"
+        >
+          {{ isDark ? "Light" : "Dark" }}
+        </button>
+        <button
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          type="button"
+          @click="emit('logout')"
+        >
+          Logout
+        </button>
       </div>
-      <span
-        class="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.2em]"
-        :class="statusClass"
-      >
-        {{ statusLabel }}
-      </span>
-      <button
-        class="panel-muted px-3 py-1.5 text-xs font-medium"
-        type="button"
-        @click="toggleTheme"
-      >
-        {{ isDark ? "Light" : "Dark" }}
-      </button>
-      <button
-        class="panel-muted px-3 py-1.5 text-xs font-medium"
-        type="button"
-        @click="emit('logout')"
-      >
-        Logout
-      </button>
+
+      <div class="hidden items-center gap-2 sm:flex">
+        <div class="text-center">
+          <p class="text-lg font-semibold leading-none">{{ timeLabel }}</p>
+          <p
+            class="mt-1 text-[10px] uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
+          >
+            {{ dateLabel }}
+          </p>
+        </div>
+        <span
+          class="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.2em]"
+          :class="statusClass"
+        >
+          {{ statusLabel }}
+        </span>
+      </div>
     </div>
   </header>
 </template>

@@ -20,6 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const draggingTaskId = ref<string | null>(null);
+const dropTargetStatus = ref<TaskStatus | null>(null);
 
 const tasksByStatus = computed<Record<TaskStatus, Task[]>>(() => {
   return props.tasks.reduce<Record<TaskStatus, Task[]>>(
@@ -114,11 +115,36 @@ function displayTags(task: Task) {
 }
 
 function onDragStart(task: Task) {
+  if (!props.canMoveStatus) {
+    return;
+  }
   draggingTaskId.value = task.id;
 }
 
 function onDragEnd() {
   draggingTaskId.value = null;
+  dropTargetStatus.value = null;
+}
+
+function onColumnDragOver(status: TaskStatus) {
+  if (!draggingTaskId.value || !props.canMoveStatus) {
+    return;
+  }
+  dropTargetStatus.value = status;
+}
+
+function onColumnDragLeave(event: DragEvent, status: TaskStatus) {
+  if (dropTargetStatus.value !== status) {
+    return;
+  }
+
+  const currentTarget = event.currentTarget as HTMLElement | null;
+  const relatedTarget = event.relatedTarget as Node | null;
+  if (currentTarget && relatedTarget && currentTarget.contains(relatedTarget)) {
+    return;
+  }
+
+  dropTargetStatus.value = null;
 }
 
 function onDropToStatus(status: TaskStatus) {
@@ -127,6 +153,7 @@ function onDropToStatus(status: TaskStatus) {
   }
   emit("moveTaskStatus", { taskId: draggingTaskId.value, status });
   draggingTaskId.value = null;
+  dropTargetStatus.value = null;
 }
 </script>
 
@@ -139,7 +166,8 @@ function onDropToStatus(status: TaskStatus) {
       :key="column.status"
       class="panel-muted flex w-[280px] min-w-[280px] flex-col p-2"
       :class="themeForStatus(column.status).column"
-      @dragover.prevent
+      @dragover.prevent="onColumnDragOver(column.status)"
+      @dragleave="onColumnDragLeave($event, column.status)"
       @drop="onDropToStatus(column.status)"
     >
       <header class="mb-2 flex items-center justify-between px-1">
@@ -157,6 +185,12 @@ function onDropToStatus(status: TaskStatus) {
       </header>
 
       <div class="space-y-2 overflow-y-auto">
+        <div
+          v-if="dropTargetStatus === column.status && draggingTaskId"
+          class="rounded-md border border-dashed border-amber-400/80 bg-amber-100/40 px-3 py-2 text-xs font-medium text-amber-700 transition-all animate-pulse dark:bg-amber-500/10 dark:text-amber-300"
+        >
+          Solte aqui para mover para {{ column.label }}
+        </div>
         <div
           v-for="task in tasksForStatus(column.status)"
           :key="task.id"

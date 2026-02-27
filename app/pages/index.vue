@@ -33,7 +33,8 @@ const { data: meData } = await useFetch<{
 const router = useRouter();
 
 const agents = computed(() => data.value?.agents ?? []);
-const tasks = computed(() => data.value?.tasks ?? []);
+const tasksState = ref<Task[]>([]);
+const tasks = computed(() => tasksState.value);
 const feed = computed(() => data.value?.feed ?? []);
 const columns = computed<DashboardData["columns"]>(
   () =>
@@ -47,7 +48,19 @@ const columns = computed<DashboardData["columns"]>(
 );
 
 const selectedTaskId = ref<string | null>(null);
-const showTaskModal = ref(false);
+
+watch(
+  () => data.value?.tasks,
+  (nextTasks) => {
+    tasksState.value = (nextTasks ?? []).map((task) => ({
+      ...task,
+      assigneeIds: [...task.assigneeIds],
+      labels: [...task.labels],
+      tags: [...task.tags],
+    }));
+  },
+  { immediate: true },
+);
 
 watch(
   tasks,
@@ -138,15 +151,16 @@ function onSelectTask(task: { id: string }) {
   selectedTaskId.value = task.id;
 }
 
-function openTaskModal() {
-  if (!selectedTask.value) {
-    return;
-  }
-  showTaskModal.value = true;
-}
-
-function closeTaskModal() {
-  showTaskModal.value = false;
+function applyTaskStatusLocal(taskId: string, status: TaskStatus) {
+  tasksState.value = tasksState.value.map((task) => {
+    if (task.id !== taskId) {
+      return task;
+    }
+    return {
+      ...task,
+      status,
+    };
+  });
 }
 
 async function onMoveTaskStatus(payload: {
@@ -157,14 +171,29 @@ async function onMoveTaskStatus(payload: {
     return;
   }
 
-  await $fetch(`/api/tasks/${payload.taskId}/status`, {
-    method: "PATCH",
-    body: {
-      status: payload.status,
-    },
-  });
+  const currentStatus =
+    data.value?.tasks.find((task) => task.id === payload.taskId)?.status ??
+    null;
 
-  await refresh();
+  if (currentStatus === payload.status) {
+    return;
+  }
+
+  applyTaskStatusLocal(payload.taskId, payload.status);
+
+  try {
+    await $fetch(`/api/tasks/${payload.taskId}/status`, {
+      method: "PATCH",
+      body: {
+        status: payload.status,
+      },
+    });
+  } catch (err) {
+    if (currentStatus) {
+      applyTaskStatusLocal(payload.taskId, currentStatus);
+    }
+    throw err;
+  }
 }
 </script>
 
@@ -209,15 +238,6 @@ async function onMoveTaskStatus(payload: {
           @select-task="onSelectTask"
           @move-task-status="onMoveTaskStatus"
         />
-        <div class="absolute right-6 top-[5.75rem] z-20">
-          <button
-            class="panel-muted px-3 py-1.5 text-xs"
-            :disabled="!selectedTask"
-            @click="openTaskModal"
-          >
-            Abrir card em popup
-          </button>
-        </div>
         <TaskDetailPanel
           :task="selectedTask"
           :agents="agents"
@@ -225,8 +245,6 @@ async function onMoveTaskStatus(payload: {
           :activities="selectedActivities"
           :documents="selectedDocuments"
           :notifications="selectedNotifications"
-          :can-move-status="canMoveStatus"
-          @move-task-status="onMoveTaskStatus"
         />
         <LiveFeed
           :feed="feed"
@@ -239,24 +257,5 @@ async function onMoveTaskStatus(payload: {
         />
       </template>
     </main>
-
-    <div
-      v-if="showTaskModal && selectedTask"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-      @click.self="closeTaskModal"
-    >
-      <TaskDetailPanel
-        :task="selectedTask"
-        :agents="agents"
-        :messages="selectedMessages"
-        :activities="selectedActivities"
-        :documents="selectedDocuments"
-        :notifications="selectedNotifications"
-        :can-move-status="canMoveStatus"
-        mode="modal"
-        @move-task-status="onMoveTaskStatus"
-        @close="closeTaskModal"
-      />
-    </div>
   </div>
 </template>

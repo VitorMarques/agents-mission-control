@@ -16,22 +16,8 @@ const props = defineProps<{
   activities: TaskActivity[];
   documents: TaskDocument[];
   notifications: TaskNotification[];
-  canMoveStatus: boolean;
-  mode?: "sidebar" | "modal";
+  canMoveStatus?: boolean;
 }>();
-
-const emit = defineEmits<{
-  moveTaskStatus: [payload: { taskId: string; status: Task["status"] }];
-  close: [];
-}>();
-
-const statusFlow: Task["status"][] = [
-  "inbox",
-  "assigned",
-  "in_progress",
-  "review",
-  "done",
-];
 
 const activeTab = ref<
   "messages" | "activities" | "documents" | "notifications"
@@ -51,42 +37,6 @@ watch(
   },
 );
 
-const previousStatus = computed<Task["status"] | null>(() => {
-  if (!props.task) {
-    return null;
-  }
-  const idx = statusFlow.indexOf(props.task.status);
-  if (idx <= 0) {
-    return null;
-  }
-  return statusFlow[idx - 1] ?? null;
-});
-
-const nextStatus = computed<Task["status"] | null>(() => {
-  if (!props.task) {
-    return null;
-  }
-  const idx = statusFlow.indexOf(props.task.status);
-  if (idx === -1 || idx >= statusFlow.length - 1) {
-    return null;
-  }
-  return statusFlow[idx + 1] ?? null;
-});
-
-function moveToStatus(status: Task["status"] | null) {
-  if (!props.task || !status || !props.canMoveStatus) {
-    return;
-  }
-  emit("moveTaskStatus", { taskId: props.task.id, status });
-}
-
-const panelClass = computed(() => {
-  if (props.mode === "modal") {
-    return "panel scroll-thin h-[85vh] w-[min(760px,92vw)] overflow-y-auto p-4";
-  }
-  return "panel scroll-thin hidden h-[calc(100vh-6.5rem)] w-[360px] min-w-[360px] flex-col overflow-y-auto p-3 2xl:flex";
-});
-
 const taskTags = computed(() => {
   if (!props.task) {
     return [] as string[];
@@ -96,22 +46,15 @@ const taskTags = computed(() => {
 </script>
 
 <template>
-  <aside :class="panelClass">
+  <aside
+    class="panel scroll-thin hidden h-[calc(100vh-6.5rem)] w-[360px] min-w-[360px] flex-col overflow-y-auto p-3 xl:flex"
+  >
     <template v-if="props.task">
-      <div class="flex items-center justify-between gap-2">
-        <p
-          class="text-xs uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
-        >
-          Task Detail
-        </p>
-        <button
-          v-if="props.mode === 'modal'"
-          class="panel-muted px-2 py-1 text-xs"
-          @click="emit('close')"
-        >
-          Fechar
-        </button>
-      </div>
+      <p
+        class="text-xs uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
+      >
+        Task Detail
+      </p>
       <h2 class="mt-1 text-base font-semibold">{{ props.task.title }}</h2>
       <p class="mt-1 text-sm text-[rgb(var(--muted-foreground))]">
         {{ props.task.description }}
@@ -125,26 +68,6 @@ const taskTags = computed(() => {
         >
           {{ label }}
         </span>
-      </div>
-
-      <div
-        v-if="props.canMoveStatus"
-        class="mt-3 grid grid-cols-2 gap-2 text-xs"
-      >
-        <button
-          class="panel-muted px-2 py-1.5"
-          :disabled="!previousStatus"
-          @click="moveToStatus(previousStatus)"
-        >
-          ← Status anterior
-        </button>
-        <button
-          class="panel-muted px-2 py-1.5"
-          :disabled="!nextStatus"
-          @click="moveToStatus(nextStatus)"
-        >
-          Próximo status →
-        </button>
       </div>
 
       <div class="mt-4 grid grid-cols-2 gap-2 text-xs">

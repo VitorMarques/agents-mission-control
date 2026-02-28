@@ -14,21 +14,8 @@ const isDark = useState<boolean>("theme-dark", () => false);
 const runtimeConfig = useRuntimeConfig();
 const now = ref(new Date());
 
-const convexProjectName = computed(() => {
-  const rawUrl = String(runtimeConfig.public.convexUrl ?? "").trim();
-  if (!rawUrl) {
-    return String(runtimeConfig.public.appName ?? "Mission Dashboard");
-  }
-
-  try {
-    const host = new URL(rawUrl).hostname;
-    const projectSlug = host.split(".")[0];
-    return (
-      projectSlug || String(runtimeConfig.public.appName ?? "Mission Dashboard")
-    );
-  } catch {
-    return String(runtimeConfig.public.appName ?? "Mission Dashboard");
-  }
+const projectName = computed(() => {
+  return runtimeConfig.public.appName ?? "Mission Dashboard";
 });
 
 const docsUrl = computed(() => String(runtimeConfig.public.docsUrl ?? "#"));
@@ -108,7 +95,7 @@ watchEffect(() => {
         >
           Mission Control
         </p>
-        <h1 class="text-sm font-semibold">{{ convexProjectName }}</h1>
+        <h1 class="text-sm font-semibold">{{ projectName }}</h1>
       </div>
     </div>
 

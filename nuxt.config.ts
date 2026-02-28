@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      appName: "Agents Mission Dashboard",
+      appName: process.env.NUXT_PUBLIC_APP_NAME ?? "Agents Mission Dashboard",
       docsUrl: "#",
       convexUrl: "",
     },

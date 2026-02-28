@@ -48,6 +48,7 @@ const columns = computed<DashboardData["columns"]>(
 );
 
 const selectedTaskId = ref<string | null>(null);
+const showTaskModal = ref(false);
 
 watch(
   () => data.value?.tasks,
@@ -149,6 +150,11 @@ async function logout() {
 
 function onSelectTask(task: { id: string }) {
   selectedTaskId.value = task.id;
+  showTaskModal.value = true;
+}
+
+function closeTaskModal() {
+  showTaskModal.value = false;
 }
 
 function applyTaskStatusLocal(taskId: string, status: TaskStatus) {
@@ -238,13 +244,15 @@ async function onMoveTaskStatus(payload: {
           @select-task="onSelectTask"
           @move-task-status="onMoveTaskStatus"
         />
-        <TaskDetailPanel
+        <TaskDetailModal
+          v-if="showTaskModal"
           :task="selectedTask"
           :agents="agents"
           :messages="selectedMessages"
           :activities="selectedActivities"
           :documents="selectedDocuments"
           :notifications="selectedNotifications"
+          @close="closeTaskModal"
         />
         <LiveFeed
           :feed="feed"

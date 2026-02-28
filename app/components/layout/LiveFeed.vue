@@ -99,7 +99,7 @@ function contextForTask(taskId?: string) {
 <template>
   <!-- Botão flutuante para abrir/fechar -->
   <button
-    class="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg transition-all hover:bg-amber-600 hover:scale-105 active:scale-95"
+    class="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg transition-all hover:bg-amber-600 hover:scale-105 active:scale-95 lg:bottom-6 lg:right-4"
     @click="toggleOpen"
     aria-label="Toggle Live Feed"
   >
@@ -321,9 +321,10 @@ function contextForTask(taskId?: string) {
     </Transition>
   </Teleport>
 
-  <!-- Desktop: Always visible sidebar -->
+  <!-- Desktop: Toggleable sidebar -->
   <aside
-    class="panel scroll-thin hidden lg:fixed lg:right-4 lg:top-[4.5rem] lg:z-30 lg:flex lg:h-[calc(100vh-6.5rem)] lg:w-[290px] lg:flex-col lg:overflow-y-auto lg:p-3"
+    v-if="isOpen"
+    class="panel scroll-thin fixed right-4 top-[4.5rem] z-30 hidden h-[calc(100vh-6.5rem)] w-[290px] flex-col overflow-y-auto p-3 lg:flex"
   >
     <div class="mb-3 flex w-full items-center justify-between">
       <h2

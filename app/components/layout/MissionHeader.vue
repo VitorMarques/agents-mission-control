@@ -144,10 +144,10 @@ watchEffect(() => {
     </div>
 
     <div class="flex items-center gap-2 lg:gap-3">
-      <!-- Mobile: Compact buttons -->
-      <div class="flex items-center gap-1 lg:gap-2">
+      <!-- Mobile: Compact icon buttons -->
+      <div class="flex items-center gap-1 lg:hidden">
         <button
-          class="panel-muted p-2 text-xs font-medium lg:px-3 lg:py-1.5"
+          class="panel-muted p-2"
           type="button"
           @click="toggleTheme"
           :title="isDark ? 'Light mode' : 'Dark mode'"
@@ -155,7 +155,7 @@ watchEffect(() => {
           <svg
             v-if="isDark"
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 lg:h-auto lg:w-auto"
+            class="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -174,7 +174,7 @@ watchEffect(() => {
           <svg
             v-else
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 lg:h-auto lg:w-auto"
+            class="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -184,14 +184,14 @@ watchEffect(() => {
           </svg>
         </button>
         <button
-          class="panel-muted p-2 text-xs font-medium lg:px-3 lg:py-1.5"
+          class="panel-muted p-2"
           type="button"
           @click="emit('logout')"
           title="Logout"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 lg:h-auto lg:w-auto"
+            class="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -201,6 +201,32 @@ watchEffect(() => {
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
+        </button>
+      </div>
+
+      <!-- Desktop: Full buttons with text -->
+      <div class="hidden lg:flex lg:items-center lg:gap-2">
+        <a
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          :href="docsUrl"
+          target="_blank"
+          rel="noreferrer"
+        >
+          📚 Docs
+        </a>
+        <button
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          type="button"
+          @click="toggleTheme"
+        >
+          {{ isDark ? "Light" : "Dark" }}
+        </button>
+        <button
+          class="panel-muted px-3 py-1.5 text-xs font-medium"
+          type="button"
+          @click="emit('logout')"
+        >
+          Logout
         </button>
       </div>
 

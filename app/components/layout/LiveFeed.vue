@@ -57,12 +57,10 @@ const taskById = computed<Record<string, Task>>(() => {
 
 const filteredFeed = computed(() => {
   return props.feed.filter((event) => {
-    // Filtro por agente
     const matchesAgent =
       selectedAgentId.value === "all" ||
       event.agentId === selectedAgentId.value;
 
-    // Filtro por tag (verifica se a task do evento tem a tag selecionada)
     const taskTags = event.taskId ? taskTagsMap.value[event.taskId] || [] : [];
     const matchesTag =
       selectedTag.value === "all" || taskTags.includes(selectedTag.value);
@@ -97,16 +95,15 @@ function contextForTask(taskId?: string) {
 </script>
 
 <template>
-  <!-- Botão flutuante para abrir/fechar -->
+  <!-- Mobile: Floating button -->
   <button
-    class="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg transition-all hover:bg-amber-600 hover:scale-105 active:scale-95 lg:bottom-6 lg:right-4"
+    class="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg transition-all hover:bg-amber-600 hover:scale-105 active:scale-95 lg:hidden"
     @click="toggleOpen"
     aria-label="Toggle Live Feed"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-white transition-transform"
-      :class="isOpen ? 'rotate-180' : ''"
+      class="h-5 w-5 text-white"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -148,185 +145,170 @@ function contextForTask(taskId?: string) {
           </span>
         </div>
 
-    <div class="mb-2 flex flex-wrap gap-1">
-      <button
-        class="panel-muted px-2 py-1 text-[11px]"
-        :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
-        @click="selectedAgentId = 'all'"
-      >
-        All Agents
-      </button>
-      <button
-        v-for="agent in props.agents"
-        :key="agent.id"
-        class="panel-muted px-2 py-1 text-[11px]"
-        :class="selectedAgentId === agent.id ? 'ring-1 ring-amber-400' : ''"
-        @click="selectedAgentId = agent.id"
-      >
-        {{ agent.avatarEmoji }} {{ agent.name }}
-      </button>
-    </div>
-
-    <div class="mb-3 flex flex-wrap gap-1">
-      <button
-        class="panel-muted px-2 py-1 text-[11px]"
-        :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"
-        @click="selectedTag = 'all'"
-      >
-        All Tags
-      </button>
-      <button
-        v-for="tag in allTags"
-        :key="tag"
-        class="panel-muted px-2 py-1 text-[11px]"
-        :class="selectedTag === tag ? 'ring-1 ring-violet-400' : ''"
-        @click="selectedTag = tag"
-      >
-        {{ tag }}
-      </button>
-    </div>
-
-    <ul class="space-y-2">
-      <li v-for="event in filteredFeed" :key="event.id" class="panel-muted p-2">
-        <button
-          class="w-full text-left"
-          type="button"
-          @click="toggleExpand(event.id)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <p
-              class="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
-            >
-              {{ event.author }}
-            </p>
-            <span
-              class="mt-0.5 text-[10px] transition-transform"
-              :class="expandedEventId === event.id ? 'rotate-180' : ''"
-            >
-              ▼
-            </span>
-          </div>
-          <p class="text-sm">{{ event.summary }}</p>
-          <p class="mt-1 text-xs text-[rgb(var(--muted-foreground))]">
-            {{ event.timestampLabel }}
-          </p>
-        </button>
-
-        <Transition name="feed-expand">
-          <div
-            v-if="expandedEventId === event.id"
-            class="mt-2 space-y-2 border-t border-[rgb(var(--border))] pt-2 text-xs"
+        <div class="mb-2 flex flex-wrap gap-1">
+          <button
+            class="panel-muted px-2 py-1 text-[11px]"
+            :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
+            @click="selectedAgentId = 'all'"
           >
-            <template v-if="contextForTask(event.taskId).task">
-              <p class="font-semibold">
-                Task: {{ contextForTask(event.taskId).task?.title }}
-              </p>
-              <p class="text-[rgb(var(--muted-foreground))]">
-                {{ contextForTask(event.taskId).task?.description }}
-              </p>
-              <p>
-                Status atual:
-                <span class="font-semibold uppercase">{{
-                  contextForTask(event.taskId).task?.status
-                }}</span>
-              </p>
-            </template>
+            All Agents
+          </button>
+          <button
+            v-for="agent in props.agents"
+            :key="agent.id"
+            class="panel-muted px-2 py-1 text-[11px]"
+            :class="selectedAgentId === agent.id ? 'ring-1 ring-amber-400' : ''"
+            @click="selectedAgentId = agent.id"
+          >
+            {{ agent.avatarEmoji }} {{ agent.name }}
+          </button>
+        </div>
 
-            <div>
-              <p class="font-semibold">Comentários</p>
-              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
-                <li
-                  v-for="message in contextForTask(event.taskId).messages.slice(
-                    0,
-                    3,
-                  )"
-                  :key="message.id"
-                >
-                  {{ message.content }}
-                </li>
-                <li v-if="contextForTask(event.taskId).messages.length === 0">
-                  Nenhum comentário.
-                </li>
-              </ul>
-            </div>
+        <div class="mb-3 flex flex-wrap gap-1">
+          <button
+            class="panel-muted px-2 py-1 text-[11px]"
+            :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"
+            @click="selectedTag = 'all'"
+          >
+            All Tags
+          </button>
+          <button
+            v-for="tag in allTags"
+            :key="tag"
+            class="panel-muted px-2 py-1 text-[11px]"
+            :class="selectedTag === tag ? 'ring-1 ring-violet-400' : ''"
+            @click="selectedTag = tag"
+          >
+            {{ tag }}
+          </button>
+        </div>
 
-            <div>
-              <p class="font-semibold">Atividades</p>
-              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
-                <li
-                  v-for="activity in contextForTask(
-                    event.taskId,
-                  ).activities.slice(0, 3)"
-                  :key="activity.id"
-                >
-                  {{ activity.message }}
-                </li>
-                <li v-if="contextForTask(event.taskId).activities.length === 0">
-                  Nenhuma atividade.
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p class="font-semibold">Documentos</p>
-              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
-                <li
-                  v-for="document in contextForTask(
-                    event.taskId,
-                  ).documents.slice(0, 3)"
-                  :key="document.id"
-                >
-                  {{ document.title }}
-                </li>
-                <li v-if="contextForTask(event.taskId).documents.length === 0">
-                  Nenhum documento.
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p class="font-semibold">Menções / Notificações</p>
-              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
-                <li
-                  v-for="notification in contextForTask(
-                    event.taskId,
-                  ).notifications.slice(0, 3)"
-                  :key="notification.id"
-                >
-                  {{ notification.content }}
-                </li>
-                <li
-                  v-if="contextForTask(event.taskId).notifications.length === 0"
-                >
-                  Nenhuma menção.
-                </li>
-              </ul>
-            </div>
-
-            <div
-              v-if="
-                contextForTask(event.taskId).activities.some(
-                  (a) => a.type === 'decision',
-                )
-              "
-              class="rounded-md bg-amber-100/70 px-2 py-1 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+        <!-- Feed items for mobile -->
+        <ul class="space-y-2">
+          <li v-for="event in filteredFeed" :key="event.id" class="panel-muted p-2">
+            <button
+              class="w-full text-left"
+              type="button"
+              @click="toggleExpand(event.id)"
             >
-              Este item contém decisão registrada.
-            </div>
-          </div>
-        </Transition>
-      </li>
-    </ul>
+              <div class="flex items-start justify-between gap-2">
+                <p
+                  class="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
+                >
+                  {{ event.author }}
+                </p>
+                <span
+                  class="mt-0.5 text-[10px] transition-transform"
+                  :class="expandedEventId === event.id ? 'rotate-180' : ''"
+                >
+                  ▼
+                </span>
+              </div>
+              <p class="text-sm">{{ event.summary }}</p>
+              <p class="mt-1 text-xs text-[rgb(var(--muted-foreground))]">
+                {{ event.timestampLabel }}
+              </p>
+            </button>
+
+            <Transition name="feed-expand">
+              <div
+                v-if="expandedEventId === event.id"
+                class="mt-2 space-y-2 border-t border-[rgb(var(--border))] pt-2 text-xs"
+              >
+                <template v-if="contextForTask(event.taskId).task">
+                  <p class="font-semibold">
+                    Task: {{ contextForTask(event.taskId).task?.title }}
+                  </p>
+                  <p class="text-[rgb(var(--muted-foreground))]">
+                    {{ contextForTask(event.taskId).task?.description }}
+                  </p>
+                  <p>
+                    Status atual:
+                    <span class="font-semibold uppercase">{{
+                      contextForTask(event.taskId).task?.status
+                    }}</span>
+                  </p>
+                </template>
+
+                <div>
+                  <p class="font-semibold">Comentários</p>
+                  <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                    <li
+                      v-for="message in contextForTask(event.taskId).messages.slice(0, 3)"
+                      :key="message.id"
+                    >
+                      {{ message.content }}
+                    </li>
+                    <li v-if="contextForTask(event.taskId).messages.length === 0">
+                      Nenhum comentário.
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p class="font-semibold">Atividades</p>
+                  <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                    <li
+                      v-for="activity in contextForTask(event.taskId).activities.slice(0, 3)"
+                      :key="activity.id"
+                    >
+                      {{ activity.message }}
+                    </li>
+                    <li v-if="contextForTask(event.taskId).activities.length === 0">
+                      Nenhuma atividade.
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p class="font-semibold">Documentos</p>
+                  <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                    <li
+                      v-for="document in contextForTask(event.taskId).documents.slice(0, 3)"
+                      :key="document.id"
+                    >
+                      {{ document.title }}
+                    </li>
+                    <li v-if="contextForTask(event.taskId).documents.length === 0">
+                      Nenhum documento.
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p class="font-semibold">Menções / Notificações</p>
+                  <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                    <li
+                      v-for="notification in contextForTask(event.taskId).notifications.slice(0, 3)"
+                      :key="notification.id"
+                    >
+                      {{ notification.content }}
+                    </li>
+                    <li v-if="contextForTask(event.taskId).notifications.length === 0">
+                      Nenhuma menção.
+                    </li>
+                  </ul>
+                </div>
+
+                <div
+                  v-if="contextForTask(event.taskId).activities.some((a) => a.type === 'decision')"
+                  class="rounded-md bg-amber-100/70 px-2 py-1 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+                >
+                  Este item contém decisão registrada.
+                </div>
+              </div>
+            </Transition>
+          </li>
+        </ul>
       </aside>
     </Transition>
   </Teleport>
 
-  <!-- Desktop: Toggleable sidebar -->
+  <!-- Desktop: Always visible sidebar (original behavior) -->
   <aside
-    v-if="isOpen"
-    class="panel scroll-thin fixed right-4 top-[4.5rem] z-30 hidden h-[calc(100vh-6.5rem)] w-[290px] flex-col overflow-y-auto p-3 lg:flex"
+    class="panel scroll-thin hidden h-[calc(100vh-6.5rem)] min-w-[290px] flex-col overflow-y-auto p-3 xl:flex"
   >
-    <div class="mb-3 flex w-full items-center justify-between">
+    <div class="mb-3 flex items-center justify-between">
       <h2
         class="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
       >
@@ -376,6 +358,7 @@ function contextForTask(taskId?: string) {
       </button>
     </div>
 
+    <!-- Feed items for desktop -->
     <ul class="space-y-2">
       <li v-for="event in filteredFeed" :key="event.id" class="panel-muted p-2">
         <button
@@ -426,10 +409,7 @@ function contextForTask(taskId?: string) {
               <p class="font-semibold">Comentários</p>
               <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
                 <li
-                  v-for="message in contextForTask(event.taskId).messages.slice(
-                    0,
-                    3,
-                  )"
+                  v-for="message in contextForTask(event.taskId).messages.slice(0, 3)"
                   :key="message.id"
                 >
                   {{ message.content }}
@@ -444,9 +424,7 @@ function contextForTask(taskId?: string) {
               <p class="font-semibold">Atividades</p>
               <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
                 <li
-                  v-for="activity in contextForTask(
-                    event.taskId,
-                  ).activities.slice(0, 3)"
+                  v-for="activity in contextForTask(event.taskId).activities.slice(0, 3)"
                   :key="activity.id"
                 >
                   {{ activity.message }}
@@ -461,9 +439,7 @@ function contextForTask(taskId?: string) {
               <p class="font-semibold">Documentos</p>
               <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
                 <li
-                  v-for="document in contextForTask(
-                    event.taskId,
-                  ).documents.slice(0, 3)"
+                  v-for="document in contextForTask(event.taskId).documents.slice(0, 3)"
                   :key="document.id"
                 >
                   {{ document.title }}
@@ -478,27 +454,19 @@ function contextForTask(taskId?: string) {
               <p class="font-semibold">Menções / Notificações</p>
               <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
                 <li
-                  v-for="notification in contextForTask(
-                    event.taskId,
-                  ).notifications.slice(0, 3)"
+                  v-for="notification in contextForTask(event.taskId).notifications.slice(0, 3)"
                   :key="notification.id"
                 >
                   {{ notification.content }}
                 </li>
-                <li
-                  v-if="contextForTask(event.taskId).notifications.length === 0"
-                >
+                <li v-if="contextForTask(event.taskId).notifications.length === 0">
                   Nenhuma menção.
                 </li>
               </ul>
             </div>
 
             <div
-              v-if="
-                contextForTask(event.taskId).activities.some(
-                  (a) => a.type === 'decision',
-                )
-              "
+              v-if="contextForTask(event.taskId).activities.some((a) => a.type === 'decision')"
               class="rounded-md bg-amber-100/70 px-2 py-1 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
             >
               Este item contém decisão registrada.

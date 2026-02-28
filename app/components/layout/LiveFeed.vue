@@ -20,8 +20,33 @@ const props = defineProps<{
   notificationsByTask: Record<string, TaskNotification[]>;
 }>();
 
+const isOpen = ref(false);
 const selectedAgentId = ref<string>("all");
+const selectedTag = ref<string>("all");
 const expandedEventId = ref<string | null>(null);
+
+function toggleOpen() {
+  isOpen.value = !isOpen.value;
+}
+
+// Extrair tags únicas das tasks
+const allTags = computed(() => {
+  const tagSet = new Set<string>();
+  props.tasks.forEach((task) => {
+    if (task.tags && Array.isArray(task.tags)) {
+      task.tags.forEach((tag) => tagSet.add(tag));
+    }
+  });
+  return Array.from(tagSet).sort();
+});
+
+// Mapear taskId para tags
+const taskTagsMap = computed<Record<string, string[]>>(() => {
+  return props.tasks.reduce<Record<string, string[]>>((acc, task) => {
+    acc[task.id] = task.tags || [];
+    return acc;
+  }, {});
+});
 
 const taskById = computed<Record<string, Task>>(() => {
   return props.tasks.reduce<Record<string, Task>>((acc, task) => {
@@ -31,10 +56,19 @@ const taskById = computed<Record<string, Task>>(() => {
 });
 
 const filteredFeed = computed(() => {
-  if (selectedAgentId.value === "all") {
-    return props.feed;
-  }
-  return props.feed.filter((event) => event.agentId === selectedAgentId.value);
+  return props.feed.filter((event) => {
+    // Filtro por agente
+    const matchesAgent =
+      selectedAgentId.value === "all" ||
+      event.agentId === selectedAgentId.value;
+
+    // Filtro por tag (verifica se a task do evento tem a tag selecionada)
+    const taskTags = event.taskId ? taskTagsMap.value[event.taskId] || [] : [];
+    const matchesTag =
+      selectedTag.value === "all" || taskTags.includes(selectedTag.value);
+
+    return matchesAgent && matchesTag;
+  });
 });
 
 function toggleExpand(eventId: string) {
@@ -63,10 +97,32 @@ function contextForTask(taskId?: string) {
 </script>
 
 <template>
-  <aside
-    class="panel scroll-thin hidden h-[calc(100vh-6.5rem)] min-w-[290px] flex-col overflow-y-auto p-3 xl:flex"
+  <!-- Botão flutuante para abrir/fechar -->
+  <button
+    class="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg transition-all hover:bg-amber-600 hover:scale-105 active:scale-95"
+    @click="toggleOpen"
+    aria-label="Toggle Live Feed"
   >
-    <div class="mb-3 flex items-center justify-between">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5 text-white transition-transform"
+      :class="isOpen ? 'rotate-180' : ''"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+    </svg>
+  </button>
+
+  <aside
+    class="panel scroll-thin fixed bottom-20 right-4 z-30 w-[290px] max-h-[60vh] transform overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl transition-all duration-300 ease-out"
+    :class="isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'"
+  >
+    <div class="mb-3 flex w-full items-center justify-between">
       <h2
         class="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
       >
@@ -78,7 +134,7 @@ function contextForTask(taskId?: string) {
       >
     </div>
 
-    <div class="mb-3 flex flex-wrap gap-1">
+    <div class="mb-2 flex flex-wrap gap-1">
       <button
         class="panel-muted px-2 py-1 text-[11px]"
         :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
@@ -94,6 +150,25 @@ function contextForTask(taskId?: string) {
         @click="selectedAgentId = agent.id"
       >
         {{ agent.avatarEmoji }} {{ agent.name }}
+      </button>
+    </div>
+
+    <div class="mb-3 flex flex-wrap gap-1">
+      <button
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"
+        @click="selectedTag = 'all'"
+      >
+        All Tags
+      </button>
+      <button
+        v-for="tag in allTags"
+        :key="tag"
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedTag === tag ? 'ring-1 ring-violet-400' : ''"
+        @click="selectedTag = tag"
+      >
+        {{ tag }}
       </button>
     </div>
 

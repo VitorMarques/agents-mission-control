@@ -143,8 +143,10 @@ function contextForTask(taskId?: string) {
           </h2>
           <span
             class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-            >Live</span
           >
+            Live
+          </span>
+        </div>
 
     <div class="mb-2 flex flex-wrap gap-1">
       <button

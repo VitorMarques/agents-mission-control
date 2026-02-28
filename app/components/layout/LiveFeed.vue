@@ -118,21 +118,33 @@ function contextForTask(taskId?: string) {
     </svg>
   </button>
 
-  <aside
-    class="panel scroll-thin fixed bottom-20 right-2 z-30 w-[calc(100vw-1rem)] max-h-[60vh] transform overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl transition-all duration-300 ease-out sm:w-[290px] sm:right-4"
-    :class="isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'"
-  >
-    <div class="mb-3 flex w-full items-center justify-between">
-      <h2
-        class="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
+  <!-- Mobile: Backdrop overlay -->
+  <Teleport to="body">
+    <Transition name="feed-fade">
+      <div
+        v-if="isOpen"
+        class="fixed inset-0 z-30 lg:hidden"
+        @click="toggleOpen"
       >
-        Live Feed
-      </h2>
-      <span
-        class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-        >Live</span
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      </div>
+    </Transition>
+
+    <Transition name="feed-slide">
+      <aside
+        v-if="isOpen"
+        class="panel scroll-thin fixed bottom-20 right-2 z-40 w-[calc(100vw-1rem)] max-h-[60vh] overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl lg:hidden sm:w-[290px] sm:right-4"
       >
-    </div>
+        <div class="mb-3 flex w-full items-center justify-between">
+          <h2
+            class="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
+          >
+            Live Feed
+          </h2>
+          <span
+            class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+            >Live</span
+          >
 
     <div class="mb-2 flex flex-wrap gap-1">
       <button
@@ -307,6 +319,27 @@ function contextForTask(taskId?: string) {
 </template>
 
 <style scoped>
+.feed-fade-enter-active,
+.feed-fade-leave-active {
+  transition: opacity 200ms ease;
+}
+
+.feed-fade-enter-from,
+.feed-fade-leave-to {
+  opacity: 0;
+}
+
+.feed-slide-enter-active,
+.feed-slide-leave-active {
+  transition: all 250ms ease-out;
+}
+
+.feed-slide-enter-from,
+.feed-slide-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
 .feed-expand-enter-active,
 .feed-expand-leave-active {
   transition: all 180ms ease;

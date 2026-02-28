@@ -159,7 +159,7 @@ function onDropToStatus(status: TaskStatus) {
 
 <template>
   <section
-    class="panel scroll-thin flex h-[calc(100vh-5rem)] flex-1 gap-2 overflow-x-auto p-2 lg:h-[calc(100vh-6.5rem)] lg:gap-3 lg:p-3"
+    class="panel scroll-thin flex h-[100dvh] flex-1 gap-2 overflow-x-auto p-2 lg:h-[calc(100vh-6.5rem)] lg:gap-3 lg:p-3"
   >
     <article
       v-for="column in props.columns"

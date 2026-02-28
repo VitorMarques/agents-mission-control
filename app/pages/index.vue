@@ -214,10 +214,11 @@ async function onMoveTaskStatus(payload: {
     />
 
     <main class="mx-2 mt-2 flex flex-col gap-2 lg:mx-3 lg:mt-3 lg:flex-row lg:gap-3">
+      <!-- Mobile: Kanban takes full height with calc(100dvh - header) -->
       <!-- Loading state -->
       <div
         v-if="pending"
-        class="panel-muted flex h-[calc(100vh-5rem)] flex-1 items-center justify-center text-sm text-[rgb(var(--muted-foreground))] lg:h-[calc(100vh-6.5rem)]"
+        class="panel-muted flex h-[calc(100dvh-4rem)] flex-1 items-center justify-center text-sm text-[rgb(var(--muted-foreground))] lg:h-[calc(100vh-6.5rem)]"
       >
         Carregando dados da missão...
       </div>
@@ -225,7 +226,7 @@ async function onMoveTaskStatus(payload: {
       <!-- Error state -->
       <div
         v-else-if="error"
-        class="panel-muted flex h-[calc(100vh-5rem)] flex-1 flex-col items-center justify-center gap-3 text-center lg:h-[calc(100vh-6.5rem)]"
+        class="panel-muted flex h-[calc(100dvh-4rem)] flex-1 flex-col items-center justify-center gap-3 text-center lg:h-[calc(100vh-6.5rem)]"
       >
         <p class="text-sm text-red-500">Falha ao carregar dados do Convex.</p>
         <button

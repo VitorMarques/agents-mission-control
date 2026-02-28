@@ -123,7 +123,7 @@ function contextForTask(taskId?: string) {
     <Transition name="feed-fade">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-30 lg:hidden"
+        class="fixed inset-0 z-40 lg:hidden"
         @click="toggleOpen"
       >
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
@@ -133,7 +133,7 @@ function contextForTask(taskId?: string) {
     <Transition name="feed-slide">
       <aside
         v-if="isOpen"
-        class="panel scroll-thin fixed bottom-20 right-2 z-40 w-[calc(100vw-1rem)] max-h-[60vh] overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl lg:hidden sm:w-[290px] sm:right-4"
+        class="panel scroll-thin fixed bottom-20 right-2 z-50 w-[calc(100vw-1rem)] max-h-[60vh] overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl lg:hidden sm:w-[290px] sm:right-4"
       >
         <div class="mb-3 flex w-full items-center justify-between">
           <h2

@@ -237,8 +237,8 @@ async function onMoveTaskStatus(payload: {
       </div>
 
       <template v-else>
-        <!-- AgentsRail - Desktop only -->
-        <AgentsRail :agents="agents" class="hidden lg:flex" />
+        <!-- AgentsRail - Desktop sidebar + Mobile drawer -->
+        <AgentsRail :agents="agents" />
 
         <!-- KanbanBoard -->
         <KanbanBoard

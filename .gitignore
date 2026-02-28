@@ -6,6 +6,10 @@
 .cache
 dist
 
+# Nuxt compiled JS files
+*.vue.js
+*.js
+
 # Node dependencies
 node_modules
 

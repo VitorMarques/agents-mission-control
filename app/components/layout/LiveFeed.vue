@@ -315,6 +315,195 @@ function contextForTask(taskId?: string) {
         </Transition>
       </li>
     </ul>
+      </aside>
+    </Transition>
+  </Teleport>
+
+  <!-- Desktop: Always visible sidebar -->
+  <aside
+    class="panel scroll-thin hidden lg:fixed lg:right-4 lg:top-[4.5rem] lg:z-30 lg:flex lg:h-[calc(100vh-6.5rem)] lg:w-[290px] lg:flex-col lg:overflow-y-auto lg:p-3"
+  >
+    <div class="mb-3 flex w-full items-center justify-between">
+      <h2
+        class="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--muted-foreground))]"
+      >
+        Live Feed
+      </h2>
+      <span
+        class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+        >Live</span
+      >
+    </div>
+
+    <div class="mb-2 flex flex-wrap gap-1">
+      <button
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
+        @click="selectedAgentId = 'all'"
+      >
+        All Agents
+      </button>
+      <button
+        v-for="agent in props.agents"
+        :key="agent.id"
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedAgentId === agent.id ? 'ring-1 ring-amber-400' : ''"
+        @click="selectedAgentId = agent.id"
+      >
+        {{ agent.avatarEmoji }} {{ agent.name }}
+      </button>
+    </div>
+
+    <div class="mb-3 flex flex-wrap gap-1">
+      <button
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"
+        @click="selectedTag = 'all'"
+      >
+        All Tags
+      </button>
+      <button
+        v-for="tag in allTags"
+        :key="tag"
+        class="panel-muted px-2 py-1 text-[11px]"
+        :class="selectedTag === tag ? 'ring-1 ring-violet-400' : ''"
+        @click="selectedTag = tag"
+      >
+        {{ tag }}
+      </button>
+    </div>
+
+    <ul class="space-y-2">
+      <li v-for="event in filteredFeed" :key="event.id" class="panel-muted p-2">
+        <button
+          class="w-full text-left"
+          type="button"
+          @click="toggleExpand(event.id)"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <p
+              class="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]"
+            >
+              {{ event.author }}
+            </p>
+            <span
+              class="mt-0.5 text-[10px] transition-transform"
+              :class="expandedEventId === event.id ? 'rotate-180' : ''"
+            >
+              ▼
+            </span>
+          </div>
+          <p class="text-sm">{{ event.summary }}</p>
+          <p class="mt-1 text-xs text-[rgb(var(--muted-foreground))]">
+            {{ event.timestampLabel }}
+          </p>
+        </button>
+
+        <Transition name="feed-expand">
+          <div
+            v-if="expandedEventId === event.id"
+            class="mt-2 space-y-2 border-t border-[rgb(var(--border))] pt-2 text-xs"
+          >
+            <template v-if="contextForTask(event.taskId).task">
+              <p class="font-semibold">
+                Task: {{ contextForTask(event.taskId).task?.title }}
+              </p>
+              <p class="text-[rgb(var(--muted-foreground))]">
+                {{ contextForTask(event.taskId).task?.description }}
+              </p>
+              <p>
+                Status atual:
+                <span class="font-semibold uppercase">{{
+                  contextForTask(event.taskId).task?.status
+                }}</span>
+              </p>
+            </template>
+
+            <div>
+              <p class="font-semibold">Comentários</p>
+              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                <li
+                  v-for="message in contextForTask(event.taskId).messages.slice(
+                    0,
+                    3,
+                  )"
+                  :key="message.id"
+                >
+                  {{ message.content }}
+                </li>
+                <li v-if="contextForTask(event.taskId).messages.length === 0">
+                  Nenhum comentário.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="font-semibold">Atividades</p>
+              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                <li
+                  v-for="activity in contextForTask(
+                    event.taskId,
+                  ).activities.slice(0, 3)"
+                  :key="activity.id"
+                >
+                  {{ activity.message }}
+                </li>
+                <li v-if="contextForTask(event.taskId).activities.length === 0">
+                  Nenhuma atividade.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="font-semibold">Documentos</p>
+              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                <li
+                  v-for="document in contextForTask(
+                    event.taskId,
+                  ).documents.slice(0, 3)"
+                  :key="document.id"
+                >
+                  {{ document.title }}
+                </li>
+                <li v-if="contextForTask(event.taskId).documents.length === 0">
+                  Nenhum documento.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="font-semibold">Menções / Notificações</p>
+              <ul class="list-disc pl-4 text-[rgb(var(--muted-foreground))]">
+                <li
+                  v-for="notification in contextForTask(
+                    event.taskId,
+                  ).notifications.slice(0, 3)"
+                  :key="notification.id"
+                >
+                  {{ notification.content }}
+                </li>
+                <li
+                  v-if="contextForTask(event.taskId).notifications.length === 0"
+                >
+                  Nenhuma menção.
+                </li>
+              </ul>
+            </div>
+
+            <div
+              v-if="
+                contextForTask(event.taskId).activities.some(
+                  (a) => a.type === 'decision',
+                )
+              "
+              class="rounded-md bg-amber-100/70 px-2 py-1 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200"
+            >
+              Este item contém decisão registrada.
+            </div>
+          </div>
+        </Transition>
+      </li>
+    </ul>
   </aside>
 </template>
 

@@ -24,6 +24,8 @@ const isOpen = ref(false);
 const selectedAgentId = ref<string>("all");
 const selectedTag = ref<string>("all");
 const expandedEventId = ref<string | null>(null);
+const agentsFilterOpen = ref(true);
+const tagsFilterOpen = ref(true);
 
 function toggleOpen() {
   isOpen.value = !isOpen.value;
@@ -145,44 +147,107 @@ function contextForTask(taskId?: string) {
           </span>
         </div>
 
-        <div class="mb-2 flex flex-wrap gap-1">
-          <span class="text-[10px] font-medium uppercase text-[rgb(var(--muted-foreground))] mr-1">Agents:</span>
-          <button
-            class="panel-muted px-2 py-1 text-[11px]"
-            :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
-            @click="selectedAgentId = 'all'"
-          >
-            All
-          </button>
-          <button
-            v-for="agent in props.agents"
-            :key="agent.id"
-            class="panel-muted px-2 py-1 text-[11px]"
-            :class="selectedAgentId === agent.id ? 'ring-1 ring-amber-400' : ''"
-            @click="selectedAgentId = agent.id"
-          >
-            {{ agent.avatarEmoji }}
-          </button>
-        </div>
+        <!-- Filtros com seções colapsáveis -->
+        <div class="mb-3 space-y-2">
+          <!-- Agents Filter Section -->
+          <div class="overflow-hidden rounded-md border border-[rgb(var(--border))]">
+            <button
+              class="flex w-full items-center justify-between bg-[rgb(var(--muted))]/20 px-3 py-2 text-left transition-colors hover:bg-[rgb(var(--muted))]/30"
+              @click="agentsFilterOpen = !agentsFilterOpen"
+            >
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span class="text-xs font-semibold uppercase tracking-wide">Agents</span>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-[rgb(var(--muted-foreground))] transition-transform"
+                :class="agentsFilterOpen ? 'rotate-180' : ''"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <Transition name="collapse">
+              <div v-show="agentsFilterOpen" class="bg-[rgb(var(--panel))]/50 p-2">
+                <div class="mb-2 flex flex-wrap gap-1">
+                  <button
+                    class="rounded-md px-2 py-1 text-[11px] transition-all"
+                    :class="selectedAgentId === 'all' ? 'bg-amber-500 text-white' : 'panel-muted hover:bg-amber-500/20'"
+                    @click="selectedAgentId = 'all'"
+                  >
+                    All
+                  </button>
+                  <button
+                    v-for="agent in props.agents"
+                    :key="agent.id"
+                    class="rounded-md px-2 py-1 text-[11px] transition-all"
+                    :class="selectedAgentId === agent.id ? 'bg-amber-500 text-white' : 'panel-muted hover:bg-amber-500/20'"
+                    @click="selectedAgentId = agent.id"
+                  >
+                    {{ agent.avatarEmoji }} {{ agent.name }}
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
 
-        <div class="mb-3 flex flex-wrap gap-1 items-center">
-          <span class="text-[10px] font-medium uppercase text-[rgb(var(--muted-foreground))] mr-1">Tags:</span>
-          <button
-            class="panel-muted px-2 py-1 text-[11px]"
-            :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"
-            @click="selectedTag = 'all'"
-          >
-            All Tags
-          </button>
-          <button
-            v-for="tag in allTags"
-            :key="tag"
-            class="panel-muted px-2 py-1 text-[11px]"
-            :class="selectedTag === tag ? 'ring-1 ring-violet-400' : ''"
-            @click="selectedTag = tag"
-          >
-            {{ tag }}
-          </button>
+          <!-- Tags Filter Section -->
+          <div class="overflow-hidden rounded-md border border-[rgb(var(--border))]">
+            <button
+              class="flex w-full items-center justify-between bg-[rgb(var(--muted))]/20 px-3 py-2 text-left transition-colors hover:bg-[rgb(var(--muted))]/30"
+              @click="tagsFilterOpen = !tagsFilterOpen"
+            >
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <span class="text-xs font-semibold uppercase tracking-wide">Tags</span>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-[rgb(var(--muted-foreground))] transition-transform"
+                :class="tagsFilterOpen ? 'rotate-180' : ''"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <Transition name="collapse">
+              <div v-show="tagsFilterOpen" class="bg-[rgb(var(--panel))]/50 p-2">
+                <div class="flex flex-wrap gap-1">
+                  <button
+                    class="rounded-md px-2 py-1 text-[11px] transition-all"
+                    :class="selectedTag === 'all' ? 'bg-violet-500 text-white' : 'panel-muted hover:bg-violet-500/20'"
+                    @click="selectedTag = 'all'"
+                  >
+                    All
+                  </button>
+                  <button
+                    v-for="tag in allTags"
+                    :key="tag"
+                    class="rounded-md px-2 py-1 text-[11px] transition-all"
+                    :class="selectedTag === tag ? 'bg-violet-500 text-white' : 'panel-muted hover:bg-violet-500/20'"
+                    @click="selectedTag = tag"
+                  >
+                    {{ tag }}
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
 
         <!-- Feed items -->
@@ -327,6 +392,25 @@ function contextForTask(taskId?: string) {
 .feed-slide-leave-to {
   opacity: 0;
   transform: translateY(16px);
+}
+
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: all 200ms ease-out;
+  overflow: hidden;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.collapse-enter-to,
+.collapse-leave-from {
+  max-height: 200px;
 }
 
 .feed-expand-enter-active,

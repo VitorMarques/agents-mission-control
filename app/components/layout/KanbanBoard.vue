@@ -159,12 +159,12 @@ function onDropToStatus(status: TaskStatus) {
 
 <template>
   <section
-    class="panel scroll-thin flex h-[calc(100vh-6.5rem)] flex-1 gap-3 overflow-x-auto p-3"
+    class="panel scroll-thin flex h-[calc(100vh-5rem)] flex-1 gap-2 overflow-x-auto p-2 lg:h-[calc(100vh-6.5rem)] lg:gap-3 lg:p-3"
   >
     <article
       v-for="column in props.columns"
       :key="column.status"
-      class="panel-muted flex w-[280px] min-w-[280px] flex-col p-2"
+      class="panel-muted flex w-[260px] min-w-[260px] flex-col p-2 lg:w-[280px] lg:min-w-[280px]"
       :class="themeForStatus(column.status).column"
       @dragover.prevent="onColumnDragOver(column.status)"
       @dragleave="onColumnDragLeave($event, column.status)"

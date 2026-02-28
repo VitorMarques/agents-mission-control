@@ -213,17 +213,19 @@ async function onMoveTaskStatus(payload: {
       @logout="logout"
     />
 
-    <main class="mx-3 mt-3 flex gap-3">
+    <main class="mx-2 mt-2 flex flex-col gap-2 lg:mx-3 lg:mt-3 lg:flex-row lg:gap-3">
+      <!-- Loading state -->
       <div
         v-if="pending"
-        class="panel-muted flex h-[calc(100vh-6.5rem)] flex-1 items-center justify-center text-sm text-[rgb(var(--muted-foreground))]"
+        class="panel-muted flex h-[calc(100vh-5rem)] flex-1 items-center justify-center text-sm text-[rgb(var(--muted-foreground))] lg:h-[calc(100vh-6.5rem)]"
       >
         Carregando dados da missão...
       </div>
 
+      <!-- Error state -->
       <div
         v-else-if="error"
-        class="panel-muted flex h-[calc(100vh-6.5rem)] flex-1 flex-col items-center justify-center gap-3 text-center"
+        class="panel-muted flex h-[calc(100vh-5rem)] flex-1 flex-col items-center justify-center gap-3 text-center lg:h-[calc(100vh-6.5rem)]"
       >
         <p class="text-sm text-red-500">Falha ao carregar dados do Convex.</p>
         <button
@@ -235,7 +237,10 @@ async function onMoveTaskStatus(payload: {
       </div>
 
       <template v-else>
-        <AgentsRail :agents="agents" />
+        <!-- AgentsRail - Desktop only -->
+        <AgentsRail :agents="agents" class="hidden lg:flex" />
+
+        <!-- KanbanBoard -->
         <KanbanBoard
           :tasks="tasks"
           :columns="columns"

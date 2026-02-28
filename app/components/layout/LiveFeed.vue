@@ -119,7 +119,7 @@ function contextForTask(taskId?: string) {
   </button>
 
   <aside
-    class="panel scroll-thin fixed bottom-20 right-4 z-30 w-[290px] max-h-[60vh] transform overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl transition-all duration-300 ease-out"
+    class="panel scroll-thin fixed bottom-20 right-2 z-30 w-[calc(100vw-1rem)] max-h-[60vh] transform overflow-y-auto rounded-lg bg-[rgb(var(--panel))] p-3 shadow-xl transition-all duration-300 ease-out sm:w-[290px] sm:right-4"
     :class="isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'"
   >
     <div class="mb-3 flex w-full items-center justify-between">

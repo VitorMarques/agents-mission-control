@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
   <aside
-    class="panel scroll-thin flex h-[calc(100vh-6.5rem)] min-w-[250px] flex-col overflow-y-auto p-3"
+    class="panel scroll-thin flex h-[calc(100vh-5rem)] min-w-[200px] flex-col overflow-y-auto p-2 lg:h-[calc(100vh-6.5rem)] lg:min-w-[250px] lg:p-3"
   >
     <div class="mb-3 flex items-center justify-between">
       <h2

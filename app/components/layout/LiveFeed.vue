@@ -146,12 +146,13 @@ function contextForTask(taskId?: string) {
         </div>
 
         <div class="mb-2 flex flex-wrap gap-1">
+          <span class="text-[10px] font-medium uppercase text-[rgb(var(--muted-foreground))] mr-1">Agents:</span>
           <button
             class="panel-muted px-2 py-1 text-[11px]"
             :class="selectedAgentId === 'all' ? 'ring-1 ring-amber-400' : ''"
             @click="selectedAgentId = 'all'"
           >
-            All Agents
+            All
           </button>
           <button
             v-for="agent in props.agents"
@@ -160,11 +161,12 @@ function contextForTask(taskId?: string) {
             :class="selectedAgentId === agent.id ? 'ring-1 ring-amber-400' : ''"
             @click="selectedAgentId = agent.id"
           >
-            {{ agent.avatarEmoji }} {{ agent.name }}
+            {{ agent.avatarEmoji }}
           </button>
         </div>
 
-        <div class="mb-3 flex flex-wrap gap-1">
+        <div class="mb-3 flex flex-wrap gap-1 items-center">
+          <span class="text-[10px] font-medium uppercase text-[rgb(var(--muted-foreground))] mr-1">Tags:</span>
           <button
             class="panel-muted px-2 py-1 text-[11px]"
             :class="selectedTag === 'all' ? 'ring-1 ring-violet-400' : ''"

@@ -1,7 +1,7 @@
 import { convexQuery } from "~~/server/utils/convexClient";
 import { requireAuthUser } from "~~/server/utils/requestAuth";
 
-type TaskStatus = "inbox" | "assigned" | "in_progress" | "review" | "done";
+type TaskStatus = "inbox" | "assigned" | "in_progress" | "review" | "blocked" | "done";
 
 type DashboardPayload = {
   agents: Array<{
@@ -21,6 +21,8 @@ type DashboardPayload = {
     tags: string[];
     labels: string[];
     createdAt: number;
+    parentTaskId?: string;
+    blockedReason?: string;
   }>;
   feed: Array<{
     id: string;
@@ -91,6 +93,7 @@ const COLUMNS: DashboardPayload["columns"] = [
   { status: "assigned", label: "Assigned" },
   { status: "in_progress", label: "In Progress" },
   { status: "review", label: "Review" },
+  { status: "blocked", label: "Blocked" },
   { status: "done", label: "Done" },
 ];
 
@@ -123,6 +126,7 @@ function normalizeTaskStatus(value: string): TaskStatus {
     value === "assigned" ||
     value === "in_progress" ||
     value === "review" ||
+    value === "blocked" ||
     value === "done"
   ) {
     return value;
@@ -201,6 +205,8 @@ export default defineEventHandler(async (event): Promise<DashboardPayload> => {
       typeof task.createdAt === "number"
         ? task.createdAt
         : Number(task._creationTime ?? Date.now()),
+    parentTaskId: task.parentTaskId ? String(task.parentTaskId) : undefined,
+    blockedReason: task.blockedReason ? String(task.blockedReason) : undefined,
   }));
 
   const messages = rawMessages.map((message) => ({

@@ -9,6 +9,7 @@ const taskStatusValidator = v.union(
   v.literal("assigned"),
   v.literal("in_progress"),
   v.literal("review"),
+  v.literal("blocked"),
   v.literal("done"),
 );
 
@@ -43,11 +44,33 @@ export const create = mutation({
     status: taskStatusValidator,
     assigneeIds: v.array(v.id("agents")),
     tags: v.optional(v.array(v.string())),
+    parentTaskId: v.optional(v.id("tasks")),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("tasks", {
       ...args,
       tags: args.tags ?? [],
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const createSubtask = mutation({
+  args: {
+    parentTaskId: v.id("tasks"),
+    title: v.string(),
+    description: v.string(),
+    assigneeIds: v.array(v.id("agents")),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("tasks", {
+      title: args.title,
+      description: args.description,
+      status: "assigned",
+      assigneeIds: args.assigneeIds,
+      parentTaskId: args.parentTaskId,
+      tags: args.tags ?? ["delegated"],
       createdAt: Date.now(),
     });
   },
@@ -60,6 +83,19 @@ export const moveStatus = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.taskId, { status: args.status });
+  },
+});
+
+export const markBlocked = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.taskId, {
+      status: "blocked",
+      blockedReason: args.reason,
+    });
   },
 });
 

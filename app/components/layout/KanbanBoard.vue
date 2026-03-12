@@ -33,6 +33,7 @@ const tasksByStatus = computed<Record<TaskStatus, Task[]>>(() => {
       assigned: [],
       in_progress: [],
       review: [],
+      blocked: [],
       done: [],
     },
   );
@@ -76,6 +77,12 @@ const statusTheme: Record<
     card: "border-l-sky-500",
     hover: "hover:border-l-sky-400",
     chip: "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300",
+  },
+  blocked: {
+    column: "border-t-2 border-t-rose-400/70",
+    card: "border-l-rose-500",
+    hover: "hover:border-l-rose-400",
+    chip: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300",
   },
   done: {
     column: "border-t-2 border-t-violet-400/70",

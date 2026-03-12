@@ -1,7 +1,7 @@
 import { convexMutation, convexQuery } from '~~/server/utils/convexClient'
 import { requirePermission } from '~~/server/utils/requestAuth'
 
-const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'done'] as const
+const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'blocked', 'done'] as const
 
 type TaskStatus = (typeof allowedStatuses)[number]
 

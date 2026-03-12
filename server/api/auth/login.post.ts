@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
   setCookie(event, getSessionCookieName(), sessionToken, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     expires: new Date(expiresAt),

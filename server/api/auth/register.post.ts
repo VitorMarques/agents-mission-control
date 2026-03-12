@@ -1,6 +1,6 @@
 import { convexMutation, convexQuery } from "~~/server/utils/convexClient";
 import { hashPassword, type UserRole } from "~~/server/utils/auth";
-import { requireRole } from "~~/server/utils/requestAuth";
+import { requirePermission } from "~~/server/utils/requestAuth";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   // Registro público desabilitado: apenas o primeiro usuário (ADMIN) pode ser criado via API.
   // Usuários subsequentes devem ser criados via script CLI ou por um ADMIN autenticado.
   if (usersCount > 0) {
-    requireRole(event, ["ADMIN"]);
+    requirePermission(event, "user:create");
   }
 
   const normalizedEmail = body.email.trim().toLowerCase();

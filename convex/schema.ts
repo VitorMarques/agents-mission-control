@@ -100,4 +100,17 @@ export default defineSchema({
   })
     .index("by_agent", ["mentionedAgentId"])
     .index("by_agent_delivered", ["mentionedAgentId", "delivered"]),
+
+  auditLogs: defineTable({
+    action: v.string(),
+    userId: v.id("users"),
+    taskId: v.optional(v.id("tasks")),
+    before: v.optional(v.string()),
+    after: v.optional(v.string()),
+    source: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_task", ["taskId"])
+    .index("by_user", ["userId"])
+    .index("by_created_at", ["createdAt"]),
 });

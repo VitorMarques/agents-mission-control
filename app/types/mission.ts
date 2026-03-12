@@ -5,6 +5,7 @@ export type TaskStatus =
   | "assigned"
   | "in_progress"
   | "review"
+  | "blocked"
   | "done";
 
 export type Agent = {
@@ -25,6 +26,8 @@ export type Task = {
   tags: string[];
   labels: string[];
   createdAt: number;
+  parentTaskId?: string;
+  blockedReason?: string;
 };
 
 export type FeedEvent = {

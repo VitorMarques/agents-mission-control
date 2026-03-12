@@ -43,6 +43,7 @@ const columns = computed<DashboardData["columns"]>(
       { status: "assigned", label: "Assigned" },
       { status: "in_progress", label: "In Progress" },
       { status: "review", label: "Review" },
+      { status: "blocked", label: "Blocked" },
       { status: "done", label: "Done" },
     ],
 );

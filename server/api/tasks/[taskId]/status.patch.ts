@@ -2,7 +2,7 @@ import { convexMutation } from '~~/server/utils/convexClient'
 import { requireRole } from '~~/server/utils/requestAuth'
 import type { UserRole } from '~~/server/utils/auth'
 
-const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'done'] as const
+const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'blocked', 'done'] as const
 
 type TaskStatus = (typeof allowedStatuses)[number]
 

@@ -30,6 +30,13 @@ export const listByStatus = query({
   },
 });
 
+export const getById = query({
+  args: { taskId: v.id("tasks") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.taskId);
+  },
+});
+
 export const create = mutation({
   args: {
     title: v.string(),

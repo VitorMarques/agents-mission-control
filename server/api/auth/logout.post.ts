@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   deleteCookie(event, getSessionCookieName(), {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
   });
 

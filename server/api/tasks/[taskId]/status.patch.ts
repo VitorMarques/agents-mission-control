@@ -1,13 +1,12 @@
-import { convexMutation } from '~~/server/utils/convexClient'
-import { requireRole } from '~~/server/utils/requestAuth'
-import type { UserRole } from '~~/server/utils/auth'
+import { convexMutation, convexQuery } from '~~/server/utils/convexClient'
+import { requirePermission } from '~~/server/utils/requestAuth'
 
 const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'blocked', 'done'] as const
 
 type TaskStatus = (typeof allowedStatuses)[number]
 
 export default defineEventHandler(async (event) => {
-  requireRole(event, ['ADMIN', 'MANAGER'] as UserRole[])
+  const authUser = requirePermission(event, 'task:status:move')
 
   const taskId = getRouterParam(event, 'taskId')
   if (!taskId) {
@@ -19,9 +18,23 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Status inválido.' })
   }
 
+  const currentTask = await convexQuery<any>('tasks:getById', { taskId })
+  if (!currentTask) {
+    throw createError({ statusCode: 404, statusMessage: 'Task não encontrada.' })
+  }
+
   await convexMutation('tasks:moveStatus', {
     taskId,
     status: body.status,
+  })
+
+  await convexMutation('auditLogs:create', {
+    action: 'task.status.changed',
+    userId: authUser._id,
+    taskId,
+    before: String(currentTask.status ?? ''),
+    after: body.status,
+    source: 'api/tasks/[taskId]/status.patch',
   })
 
   return { ok: true }

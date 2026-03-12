@@ -34,7 +34,7 @@ export default defineSchema({
       v.literal("active"),
       v.literal("blocked"),
     ),
-    currentTaskId: v.optional(v.string()),
+    currentTaskId: v.optional(v.id("tasks")),
     sessionKey: v.string(),
   })
     .index("by_status", ["status"])
@@ -45,29 +45,28 @@ export default defineSchema({
     description: v.string(),
     status: v.union(
       v.literal("inbox"),
-      v.literal("pending"),
       v.literal("assigned"),
       v.literal("in_progress"),
       v.literal("review"),
       v.literal("done"),
     ),
-    assigneeIds: v.array(v.string()),
+    assigneeIds: v.array(v.id("agents")),
     tags: v.optional(v.array(v.string())),
     createdAt: v.optional(v.number()),
   }).index("by_status", ["status"]),
 
   messages: defineTable({
-    taskId: v.string(),
-    fromAgentId: v.string(),
+    taskId: v.id("tasks"),
+    fromAgentId: v.id("agents"),
     content: v.string(),
-    attachments: v.array(v.string()),
+    attachments: v.array(v.id("documents")),
     createdAt: v.optional(v.number()),
   }).index("by_task", ["taskId"]),
 
   mentions: defineTable({
-    taskId: v.string(),
-    messageId: v.string(),
-    mentionedAgentId: v.string(),
+    taskId: v.id("tasks"),
+    messageId: v.id("messages"),
+    mentionedAgentId: v.id("agents"),
     createdAt: v.optional(v.number()),
   })
     .index("by_agent", ["mentionedAgentId"])
@@ -75,8 +74,8 @@ export default defineSchema({
 
   activities: defineTable({
     type: v.string(),
-    agentId: v.string(),
-    taskId: v.optional(v.string()),
+    agentId: v.id("agents"),
+    taskId: v.optional(v.id("tasks")),
     message: v.string(),
     createdAt: v.optional(v.number()),
   })
@@ -87,16 +86,16 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     type: v.string(),
-    taskId: v.string(),
+    taskId: v.id("tasks"),
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
   }).index("by_task", ["taskId"]),
 
   notifications: defineTable({
-    mentionedAgentId: v.string(),
+    mentionedAgentId: v.id("agents"),
     content: v.string(),
     delivered: v.boolean(),
-    taskId: v.optional(v.string()),
+    taskId: v.optional(v.id("tasks")),
     createdAt: v.optional(v.number()),
   })
     .index("by_agent", ["mentionedAgentId"])

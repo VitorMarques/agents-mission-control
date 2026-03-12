@@ -1,13 +1,12 @@
 import { convexMutation, convexQuery } from '~~/server/utils/convexClient'
-import { requireRole } from '~~/server/utils/requestAuth'
-import type { UserRole } from '~~/server/utils/auth'
+import { requirePermission } from '~~/server/utils/requestAuth'
 
 const allowedStatuses = ['inbox', 'assigned', 'in_progress', 'review', 'done'] as const
 
 type TaskStatus = (typeof allowedStatuses)[number]
 
 export default defineEventHandler(async (event) => {
-  const authUser = requireRole(event, ['ADMIN', 'MANAGER'] as UserRole[])
+  const authUser = requirePermission(event, 'task:status:move')
 
   const taskId = getRouterParam(event, 'taskId')
   if (!taskId) {

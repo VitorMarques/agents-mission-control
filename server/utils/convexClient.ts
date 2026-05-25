@@ -1,6 +1,11 @@
 import { ConvexHttpClient } from "convex/browser";
 
+// Singleton client instance
+let _client: ConvexHttpClient | null = null;
+
 export function getServerConvexClient() {
+  if (_client) return _client;
+
   const config = useRuntimeConfig();
   const convexUrl = String(config.public.convexUrl ?? "");
 
@@ -11,20 +16,26 @@ export function getServerConvexClient() {
     });
   }
 
-  // Use a custom fetch that strips the Origin header to prevent
-  // "Invalid origin" errors when Convex receives requests proxied
-  // from the Nuxt server with the browser's origin header
-  const customFetch: typeof globalThis.fetch = (input, init) => {
-    const headers = new Headers(init?.headers);
-    headers.delete("origin");
-    headers.delete("Origin");
-    return globalThis.fetch(input, { ...init, headers });
+  // Custom fetch that strips Origin header to prevent "Invalid origin" errors.
+  // The Convex API rejects requests with unrecognized Origin headers.
+  // When a browser sends a request to our Nuxt server, the server-side Convex client
+  // should NOT forward the browser's Origin to Convex.
+  const strippedFetch: typeof globalThis.fetch = (input, init) => {
+    const newInit: RequestInit = { ...init };
+    if (newInit.headers) {
+      const headers = new Headers(newInit.headers);
+      headers.delete("origin");
+      headers.delete("Origin");
+      newInit.headers = headers;
+    }
+    return globalThis.fetch(input, newInit);
   };
 
-  return new ConvexHttpClient(convexUrl, {
-    fetch: customFetch,
-    logger: false,
+  _client = new ConvexHttpClient(convexUrl, {
+    fetch: strippedFetch,
   });
+
+  return _client;
 }
 
 export async function convexQuery<T = unknown>(

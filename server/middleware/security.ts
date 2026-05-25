@@ -37,17 +37,32 @@ function ensureOriginForMutations(event: H3Event) {
   const origin = getHeader(event, "origin");
   if (!origin) return; // allow non-browser clients
 
-  const host = getHeader(event, "host");
+  // When behind a reverse proxy (Easypanel, nginx, etc.), check x-forwarded-host
+  const forwardedHost = getHeader(event, "x-forwarded-host");
+  const host = forwardedHost || getHeader(event, "host");
   if (!host) return;
 
-  const isTls = Boolean((event.node.req.socket as { encrypted?: boolean }).encrypted);
-  const expectedOrigin = `${isTls ? "https" : "http"}://${host}`;
-  if (origin !== expectedOrigin) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Invalid origin.",
-    });
-  }
+  const forwardedProto = getHeader(event, "x-forwarded-proto");
+  const isTls =
+    forwardedProto === "https" ||
+    Boolean((event.node.req.socket as { encrypted?: boolean }).encrypted);
+  const expectedOrigin = `${isTls ? "https" : "http"}${host.includes(",") ? "s" : ""}://${host.split(",")[0]?.trim()}`;
+
+  // Accept the origin if it matches the host (direct or forwarded)
+  if (origin === expectedOrigin) return;
+
+  // Also accept if origin matches any known proxy hosts
+  const originHost = origin.replace(/^https?:\/\//, "");
+  const hostNames = [host, forwardedHost]
+    .filter(Boolean)
+    .flatMap((h) => h!.split(",").map((s) => s.trim()));
+
+  if (hostNames.some((h) => originHost === h)) return;
+
+  throw createError({
+    statusCode: 403,
+    statusMessage: "Invalid origin.",
+  });
 }
 
 export default defineEventHandler((event) => {

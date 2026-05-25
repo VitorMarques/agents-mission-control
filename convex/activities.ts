@@ -17,14 +17,15 @@ export const listByTask = query({
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("activities").collect();
+    return await ctx.db.query("activities").order("desc").collect();
   },
 });
 
 export const create = mutation({
   args: {
     type: v.string(),
-    agentId: v.id("agents"),
+    agentId: v.optional(v.id("agents")),
+    userId: v.optional(v.id("users")),
     taskId: v.optional(v.id("tasks")),
     message: v.string(),
   },

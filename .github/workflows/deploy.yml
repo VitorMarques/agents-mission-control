@@ -1,0 +1,57 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NUXT_PUBLIC_CONVEX_URL: ${{ secrets.NUXT_PUBLIC_CONVEX_URL }}
+          NUXT_PUBLIC_APP_NAME: Agents Mission Control
+
+      - name: Bump version and push tag
+        id: createtag
+        uses: phish108/autotag-action@1.1.51
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          with-v: false
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.createtag.outputs.new-tag }}
+          name: Release ${{ steps.createtag.outputs.new-tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger deployment on Easypanel
+        run: curl -X POST ${{ secrets.EASYPANEL_DEPLOY_HOOK }}

@@ -5,9 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: agents-mission-control
     ports:
-      - "3000:3000"
-    env_file:
-      - .env.local
+      - "3111:3000"
     environment:
-      NODE_ENV: production
+      - NODE_ENV=production
+      - NUXT_PUBLIC_CONVEX_URL=https://elegant-labrador-383.convex.cloud
+      - NUXT_PUBLIC_APP_NAME=Agents Mission Control
+      - SESSION_SECRET=mc-s3cr3t-k3y-2026-pr0d
     restart: unless-stopped

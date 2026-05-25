@@ -10,7 +10,10 @@
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "npx tsx node_modules/@cucumber/cucumber/bin/cucumber-js --config cucumber.mjs"
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
@@ -27,10 +30,13 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^12.9.0",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.7.0",
+    "playwright": "^1.60.0",
     "tsx": "^4.21.0",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.5"

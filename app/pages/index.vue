@@ -7,6 +7,7 @@ import type {
   TaskDocument,
   TaskMessage,
   TaskNotification,
+  TaskPriority,
   TaskStatus,
 } from "~/types/mission";
 import { ref, computed, watch } from "vue";
@@ -50,6 +51,7 @@ const columns = computed<DashboardData["columns"]>(
 
 const selectedTaskId = ref<string | null>(null);
 const showTaskModal = ref(false);
+const showCreateTaskModal = ref(false);
 
 watch(
   () => data.value?.tasks,
@@ -59,6 +61,7 @@ watch(
       assigneeIds: [...task.assigneeIds],
       labels: [...task.labels],
       tags: [...task.tags],
+      subscriberIds: [...(task.subscriberIds ?? [])],
     }));
   },
   { immediate: true },
@@ -70,9 +73,7 @@ watch(
     const stillExists = nextTasks.some(
       (task) => task.id === selectedTaskId.value,
     );
-    if (stillExists) {
-      return;
-    }
+    if (stillExists) return;
     selectedTaskId.value = nextTasks[0]?.id ?? null;
   },
   { immediate: true },
@@ -90,30 +91,22 @@ const notificationsByTask = computed(
 );
 
 const selectedMessages = computed(() => {
-  if (!selectedTask.value) {
-    return [];
-  }
+  if (!selectedTask.value) return [];
   return messagesByTask.value[selectedTask.value.id] ?? [];
 });
 
 const selectedActivities = computed(() => {
-  if (!selectedTask.value) {
-    return [];
-  }
+  if (!selectedTask.value) return [];
   return activitiesByTask.value[selectedTask.value.id] ?? [];
 });
 
 const selectedDocuments = computed(() => {
-  if (!selectedTask.value) {
-    return [];
-  }
+  if (!selectedTask.value) return [];
   return documentsByTask.value[selectedTask.value.id] ?? [];
 });
 
 const selectedNotifications = computed(() => {
-  if (!selectedTask.value) {
-    return [];
-  }
+  if (!selectedTask.value) return [];
   return notificationsByTask.value[selectedTask.value.id] ?? [];
 });
 
@@ -130,12 +123,8 @@ const reviewingTasks = computed(
 );
 
 const missionStatus = computed<"online" | "loading" | "degraded">(() => {
-  if (pending.value) {
-    return "loading";
-  }
-  if (error.value) {
-    return "degraded";
-  }
+  if (pending.value) return "loading";
+  if (error.value) return "degraded";
   return "online";
 });
 
@@ -160,13 +149,8 @@ function closeTaskModal() {
 
 function applyTaskStatusLocal(taskId: string, status: TaskStatus) {
   tasksState.value = tasksState.value.map((task) => {
-    if (task.id !== taskId) {
-      return task;
-    }
-    return {
-      ...task,
-      status,
-    };
+    if (task.id !== taskId) return task;
+    return { ...task, status };
   });
 }
 
@@ -174,33 +158,38 @@ async function onMoveTaskStatus(payload: {
   taskId: string;
   status: TaskStatus;
 }) {
-  if (!canMoveStatus.value) {
-    return;
-  }
+  if (!canMoveStatus.value) return;
 
   const currentStatus =
     data.value?.tasks.find((task) => task.id === payload.taskId)?.status ??
     null;
 
-  if (currentStatus === payload.status) {
-    return;
-  }
+  if (currentStatus === payload.status) return;
 
   applyTaskStatusLocal(payload.taskId, payload.status);
 
   try {
     await $fetch(`/api/tasks/${payload.taskId}/status`, {
       method: "PATCH",
-      body: {
-        status: payload.status,
-      },
+      body: { status: payload.status },
     });
   } catch (err) {
-    if (currentStatus) {
-      applyTaskStatusLocal(payload.taskId, currentStatus);
-    }
+    if (currentStatus) applyTaskStatusLocal(payload.taskId, currentStatus);
     throw err;
   }
+}
+
+async function onTaskCreated() {
+  showCreateTaskModal.value = false;
+  await refresh();
+}
+
+async function onMessagePosted() {
+  await refresh();
+}
+
+async function onDocumentCreated() {
+  await refresh();
 }
 </script>
 
@@ -212,11 +201,10 @@ async function onMoveTaskStatus(payload: {
       :reviewing-tasks="reviewingTasks"
       :mission-status="missionStatus"
       @logout="logout"
+      @create-task="showCreateTaskModal = true"
     />
 
     <main class="mx-2 mt-2 flex flex-col gap-2 lg:mx-3 lg:mt-3 lg:flex-row lg:gap-3">
-      <!-- Mobile: Kanban takes full height with calc(100dvh - header) -->
-      <!-- Loading state -->
       <div
         v-if="pending"
         class="panel-muted flex h-[calc(100dvh-4rem)] flex-1 items-center justify-center text-sm text-[rgb(var(--muted-foreground))] lg:h-[calc(100vh-6.5rem)]"
@@ -224,7 +212,6 @@ async function onMoveTaskStatus(payload: {
         Carregando dados da missão...
       </div>
 
-      <!-- Error state -->
       <div
         v-else-if="error"
         class="panel-muted flex h-[calc(100dvh-4rem)] flex-1 flex-col items-center justify-center gap-3 text-center lg:h-[calc(100vh-6.5rem)]"
@@ -239,10 +226,8 @@ async function onMoveTaskStatus(payload: {
       </div>
 
       <template v-else>
-        <!-- AgentsRail - Desktop sidebar + Mobile drawer -->
         <AgentsRail :agents="agents" />
 
-        <!-- KanbanBoard -->
         <KanbanBoard
           :tasks="tasks"
           :columns="columns"
@@ -251,6 +236,7 @@ async function onMoveTaskStatus(payload: {
           @select-task="onSelectTask"
           @move-task-status="onMoveTaskStatus"
         />
+
         <TaskDetailModal
           v-if="showTaskModal"
           :task="selectedTask"
@@ -260,7 +246,10 @@ async function onMoveTaskStatus(payload: {
           :documents="selectedDocuments"
           :notifications="selectedNotifications"
           @close="closeTaskModal"
+          @message-posted="onMessagePosted"
+          @document-created="onDocumentCreated"
         />
+
         <LiveFeed
           :feed="feed"
           :agents="agents"

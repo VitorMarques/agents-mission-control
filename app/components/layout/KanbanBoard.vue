@@ -155,12 +155,20 @@ function onColumnDragLeave(event: DragEvent, status: TaskStatus) {
 }
 
 function onDropToStatus(status: TaskStatus) {
-  if (!draggingTaskId.value || !props.canMoveStatus) {
-    return;
-  }
+  if (!draggingTaskId.value || !props.canMoveStatus) return;
   emit("moveTaskStatus", { taskId: draggingTaskId.value, status });
   draggingTaskId.value = null;
   dropTargetStatus.value = null;
+}
+
+function priorityClass(task: Task) {
+  switch (task.priority) {
+    case "critical": return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300";
+    case "high": return "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300";
+    case "medium": return "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300";
+    case "low": return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300";
+    default: return "bg-slate-100 text-slate-600";
+  }
 }
 </script>
 
@@ -223,9 +231,15 @@ function onDropToStatus(status: TaskStatus) {
             <span class="text-[rgb(var(--muted-foreground))]">
               👤 {{ assigneeName(task) }}
             </span>
-            <span class="text-[rgb(var(--muted-foreground))]">
-              {{ taskAgeLabel(task) }}
-            </span>
+            <div class="flex items-center gap-1.5">
+              <span
+                class="rounded px-1 py-0.5 text-[9px] font-bold uppercase"
+                :class="priorityClass(task)"
+              >{{ task.priority }}</span>
+              <span class="text-[rgb(var(--muted-foreground))]">
+                {{ taskAgeLabel(task) }}
+              </span>
+            </div>
           </div>
           <div class="mt-2 flex flex-wrap gap-1">
             <span

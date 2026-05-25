@@ -200,7 +200,7 @@ watchEffect(() => {
 
         <!-- New Task -->
         <button
-          class="hidden items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-amber-600 lg:flex"
+          class="flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-amber-600"
           type="button"
           @click="emit('createTask')"
         >

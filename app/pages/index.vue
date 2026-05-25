@@ -237,6 +237,13 @@ async function onDocumentCreated() {
           @move-task-status="onMoveTaskStatus"
         />
 
+        <CreateTaskModal
+          v-if="showCreateTaskModal"
+          :agents="agents"
+          @close="showCreateTaskModal = false"
+          @created="onTaskCreated"
+        />
+
         <TaskDetailModal
           v-if="showTaskModal"
           :task="selectedTask"
